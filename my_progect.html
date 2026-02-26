@@ -1,0 +1,1880 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="منصة بناء المتاجر الذكية بتقنية الواقع المعزز (AR)">
+    <meta name="keywords" content="متاجر إلكترونية, واقع معزز, AR, 3D">
+    <title>Dimension AR | منصة بناء المتاجر الذكية</title>
+
+    <!-- Preload critical resources -->
+    <link rel="preload" href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&display=swap" as="style">
+    <link rel="preload" href="https://unpkg.com/aos@2.3.1/dist/aos.css" as="style">
+    
+    <!-- Stylesheets -->
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&display=swap" rel="stylesheet">
+    <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
+    
+    <!-- Scripts -->
+    <script type="module" src="https://unpkg.com/@google/model-viewer/dist/model-viewer.min.js"></script>
+    <script src="https://unpkg.com/aos@2.3.1/dist/aos.js" defer></script>
+
+    <style>
+        :root {
+            --bg-color-1: #0a0c0e;
+            --bg-color-2: rgba(0, 0, 0, 0.8);
+            --card-bg: rgba(20, 23, 26, 0.9);
+            --accent-gold: #c5a059;
+            --accent-green: #4CAF50;
+            --text-silver: #b0b3b8;
+            --white: #ffffff;
+            --transition-base: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        /* Base styles */
+        * {
+            box-sizing: border-box;
+            scroll-behavior: smooth;
+        }
+
+        body {
+            margin: 0;
+            background: linear-gradient(135deg, var(--bg-color-1), var(--bg-color-2)), 
+                        url('https://images.unsplash.com/photo-1551850990-85e83c9aba1c?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=MnwzNjUyOXwwfDF8c2VhcmNofDJ8fGFydCUyMHRleHR1cmV8ZW58MHx8fHwxNjM2MTYxNTUx&ixlib=rb-1.2.1&q=80&w=1080') center/cover no-repeat;
+            color: var(--white);
+            font-family: 'Tajawal', sans-serif;
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        /* Utility classes */
+        .sr-only {
+            position: absolute;
+            width: 1px;
+            height: 1px;
+            padding: 0;
+            margin: -1px;
+            overflow: hidden;
+            clip: rect(0, 0, 0, 0);
+            white-space: nowrap;
+            border: 0;
+        }
+
+        /* ========== Animated Background ========== */
+        .animated-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -2;
+            background: linear-gradient(45deg, 
+                #0a0c0e 0%, 
+                #0f1315 25%, 
+                #0a0c0e 50%, 
+                #121518 75%, 
+                #0a0c0e 100%);
+            background-size: 400% 400%;
+            animation: gradientShift 15s ease infinite;
+        }
+
+        @keyframes gradientShift {
+            0%, 100% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+        }
+
+        /* ========== Floating Particles ========== */
+        .particles-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            pointer-events: none;
+            overflow: hidden;
+        }
+
+        .particle {
+            position: absolute;
+            width: 4px;
+            height: 4px;
+            background: var(--accent-gold);
+            border-radius: 50%;
+            opacity: 0;
+            animation: floatParticle 8s infinite;
+        }
+
+        .particle:nth-child(odd) {
+            background: var(--accent-green);
+        }
+
+        @keyframes floatParticle {
+            0% {
+                opacity: 0;
+                transform: translateY(100vh) scale(0);
+            }
+            10% {
+                opacity: 0.6;
+            }
+            90% {
+                opacity: 0.6;
+            }
+            100% {
+                opacity: 0;
+                transform: translateY(-100vh) scale(1);
+            }
+        }
+
+        /* Background glow effect */
+        .bg-glow {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle at var(--x, 50%) var(--y, 50%), 
+                        rgba(197, 160, 89, 0.08) 0%, 
+                        transparent 50%);
+            z-index: -1;
+            pointer-events: none;
+            will-change: transform;
+            animation: glowPulse 4s ease-in-out infinite;
+        }
+
+        @keyframes glowPulse {
+            0%, 100% { opacity: 0.7; }
+            50% { opacity: 1; }
+        }
+
+        /* ========== Scroll Progress Bar ========== */
+        .scroll-progress {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 0%;
+            height: 3px;
+            background: linear-gradient(90deg, var(--accent-gold), var(--accent-green));
+            z-index: 9999;
+            transition: width 0.1s ease-out;
+        }
+
+        /* Hero section */
+        .hero {
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            padding: 20px;
+            background: rgba(20, 23, 26, 0.7);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(ellipse at center, 
+                rgba(197, 160, 89, 0.03) 0%, 
+                transparent 70%);
+            animation: heroBgMove 20s linear infinite;
+        }
+
+        @keyframes heroBgMove {
+            0% { transform: translate(-25%, -25%) rotate(0deg); }
+            100% { transform: translate(-25%, -25%) rotate(360deg); }
+        }
+
+        .hero h1 {
+            font-size: clamp(2.5rem, 5vw, 4.5rem);
+            font-weight: 800;
+            margin-bottom: 20px;
+            background: linear-gradient(135deg, #fff 30%, #888 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            transform: translateY(20px);
+            animation: fadeInUp 1s forwards;
+            position: relative;
+            z-index: 1;
+        }
+
+        .hero h1::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, 
+                transparent, 
+                rgba(255, 255, 255, 0.2), 
+                transparent);
+            animation: textShimmer 3s infinite;
+        }
+
+        @keyframes textShimmer {
+            0% { left: -100%; }
+            100% { left: 100%; }
+        }
+
+        @keyframes fadeInUp {
+            to { 
+                opacity: 1; 
+                transform: translateY(0);
+            }
+        }
+
+        .hero p {
+            font-size: 1.2rem;
+            color: var(--text-silver);
+            max-width: 700px;
+            margin-bottom: 40px;
+            opacity: 0;
+            animation: fadeInUp 1s 0.3s forwards;
+            position: relative;
+            z-index: 1;
+        }
+
+        /* ========== Scroll Down Indicator ========== */
+        .scroll-indicator {
+            position: absolute;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            animation: bounceDown 2s infinite;
+            z-index: 1;
+        }
+
+        .scroll-indicator span {
+            display: block;
+            width: 30px;
+            height: 50px;
+            border: 2px solid var(--accent-gold);
+            border-radius: 25px;
+            position: relative;
+        }
+
+        .scroll-indicator span::before {
+            content: '';
+            position: absolute;
+            top: 8px;
+            left: 50%;
+            width: 6px;
+            height: 6px;
+            background: var(--accent-gold);
+            border-radius: 50%;
+            transform: translateX(-50%);
+            animation: scrollDot 2s infinite;
+        }
+
+        @keyframes bounceDown {
+            0%, 20%, 50%, 80%, 100% { transform: translateX(-50%) translateY(0); }
+            40% { transform: translateX(-50%) translateY(-15px); }
+            60% { transform: translateX(-50%) translateY(-7px); }
+        }
+
+        @keyframes scrollDot {
+            0% { opacity: 1; top: 8px; }
+            100% { opacity: 0; top: 32px; }
+        }
+
+        /* Project description */
+        .project-description {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 40px;
+            border-radius: 15px;
+            text-align: center;
+            margin: 40px 5%;
+            animation: fadeInUp 1s forwards;
+            position: relative;
+            overflow: hidden;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .project-description::before {
+            content: '';
+            position: absolute;
+            top: -2px;
+            left: -2px;
+            right: -2px;
+            bottom: -2px;
+            background: linear-gradient(45deg, 
+                var(--accent-gold), 
+                transparent, 
+                var(--accent-green), 
+                transparent);
+            background-size: 400% 400%;
+            border-radius: 17px;
+            z-index: -1;
+            animation: borderGlow 8s linear infinite;
+            opacity: 0.5;
+        }
+
+        @keyframes borderGlow {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        .project-description h2 {
+            font-size: 2rem;
+            color: var(--accent-gold);
+            margin-bottom: 20px;
+            animation: textFloat 3s ease-in-out infinite;
+        }
+
+        @keyframes textFloat {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-5px); }
+        }
+
+        .gold-text {
+            color: var(--accent-gold);
+            text-shadow: 0 0 10px rgba(197, 160, 89, 0.5);
+            animation: goldGlow 2s ease-in-out infinite alternate;
+        }
+
+        @keyframes goldGlow {
+            0% { text-shadow: 0 0 10px rgba(197, 160, 89, 0.5); }
+            100% { text-shadow: 0 0 20px rgba(197, 160, 89, 0.8), 0 0 30px rgba(197, 160, 89, 0.4); }
+        }
+
+        /* Animated Button Styles */
+        .btn {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            width: 13rem;
+            height: 3rem;
+            background-size: 300% 300%;
+            backdrop-filter: blur(1rem);
+            border-radius: 5rem;
+            transition: 0.5s;
+            animation: gradient_301 5s ease infinite;
+            border: double 4px transparent;
+            background-image: linear-gradient(#212121, #212121), 
+                            linear-gradient(137.48deg, #ffdb3b 10%, #ff9b17d7 45%, #f9ff41 67%, #feb200d7 87%);
+            background-origin: border-box;
+            background-clip: content-box, border-box;
+            cursor: pointer;
+            text-decoration: none;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn-gold {
+            background-image: linear-gradient(#212121, #212121), 
+                            linear-gradient(137.48deg, #ffdb3b 10%, #ff9b17d7 45%, #f9ff41 67%, #feb200d7 87%);
+        }
+
+        .btn-green {
+            background-image: linear-gradient(#212121, #212121), 
+                            linear-gradient(137.48deg, #4CAF50 10%, #81C784 45%, #66BB6A 67%, #4CAF50 87%);
+        }
+
+        .btn-purple {
+            background-image: linear-gradient(#212121, #212121), 
+                            linear-gradient(137.48deg, #9c27b0 10%, #ba68c8 45%, #ab47bc 67%, #9c27b0 87%);
+        }
+
+        #container-stars {
+            position: absolute;
+            z-index: -1;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            transition: 0.5s;
+            backdrop-filter: blur(1rem);
+            border-radius: 5rem;
+        }
+
+        .btn strong {
+            z-index: 2;
+            font-family: 'Tajawal', sans-serif;
+            font-size: 16px;
+            letter-spacing: 3px;
+            color: #FFFFFF;
+            text-shadow: 0 0 4px rgb(0, 0, 0);
+        }
+
+        #glow {
+            position: absolute;
+            display: flex;
+            width: 12rem;
+        }
+
+        .circle {
+            width: 100%;
+            height: 30px;
+            filter: blur(2rem);
+            animation: pulse_3011 4s infinite;
+            z-index: -1;
+        }
+
+        .btn-gold .circle {
+            background: rgba(255, 219, 59, 0.936);
+        }
+
+        .btn-green .circle {
+            background: rgba(76, 175, 80, 0.936);
+        }
+
+        .btn-purple .circle {
+            background: rgba(156, 39, 176, 0.936);
+        }
+
+        .btn:hover #container-stars {
+            z-index: 1;
+            background-color: #212121;
+        }
+
+        .btn:hover {
+            transform: scale(1.1);
+            box-shadow: 0 0 30px rgba(197, 160, 89, 0.5);
+        }
+
+        .btn .ripple {
+            position: absolute;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.5);
+            transform: scale(0);
+            animation: rippleEffect 0.6s linear;
+            pointer-events: none;
+        }
+
+        @keyframes rippleEffect {
+            to {
+                transform: scale(4);
+                opacity: 0;
+            }
+        }
+
+        .btn-wrapper {
+            animation: subtleShake 10s ease-in-out infinite;
+        }
+
+        @keyframes subtleShake {
+            0%, 95%, 100% { transform: translateX(0); }
+            96% { transform: translateX(-2px); }
+            97% { transform: translateX(2px); }
+            98% { transform: translateX(-1px); }
+            99% { transform: translateX(1px); }
+        }
+
+        .btn:active {
+            border: double 4px #FE53BB;
+            background-origin: border-box;
+            background-clip: content-box, border-box;
+            animation: none;
+        }
+
+        .btn:active .circle {
+            background: #FE53BB;
+        }
+
+        #stars {
+            position: relative;
+            background: transparent;
+            width: 200rem;
+            height: 200rem;
+        }
+
+        #stars::after {
+            content: "";
+            position: absolute;
+            top: -10rem;
+            left: -100rem;
+            width: 100%;
+            height: 100%;
+            animation: animStarRotate 90s linear infinite;
+            background-image: radial-gradient(#ffffff 1px, transparent 1%);
+            background-size: 50px 50px;
+        }
+
+        #stars::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: -50%;
+            width: 170%;
+            height: 500%;
+            animation: animStar 60s linear infinite;
+            background-image: radial-gradient(#ffffff 1px, transparent 1%);
+            background-size: 50px 50px;
+            opacity: 0.5;
+        }
+
+        @keyframes animStar {
+            from { transform: translateY(0); }
+            to { transform: translateY(-135rem); }
+        }
+
+        @keyframes animStarRotate {
+            from { transform: rotate(360deg); }
+            to { transform: rotate(0); }
+        }
+
+        @keyframes gradient_301 {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        @keyframes pulse_3011 {
+            0% {
+                transform: scale(0.75);
+                box-shadow: 0 0 0 0 rgba(0, 0, 0, 0.7);
+            }
+            70% {
+                transform: scale(1);
+                box-shadow: 0 0 0 10px rgba(0, 0, 0, 0);
+            }
+            100% {
+                transform: scale(0.75);
+                box-shadow: 0 0 0 0 rgba(0, 0, 0, 0);
+            }
+        }
+
+        /* Sections */
+        .section {
+            padding: 100px 5%;
+            max-width: 1300px;
+            margin: 0 auto;
+            position: relative;
+        }
+
+        .section-title {
+            text-align: center;
+            font-size: 2.5rem;
+            margin-bottom: 60px;
+            position: relative;
+            display: inline-block;
+            width: 100%;
+        }
+
+        .section-title::after {
+            content: '';
+            position: absolute;
+            bottom: -15px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 0;
+            height: 3px;
+            background: linear-gradient(90deg, var(--accent-gold), var(--accent-green));
+            border-radius: 3px;
+            animation: underlineExpand 1s ease-out forwards;
+        }
+
+        @keyframes underlineExpand {
+            to { width: 150px; }
+        }
+
+        .section-title span {
+            color: var(--accent-gold);
+            animation: goldGlow 2s ease-in-out infinite alternate;
+        }
+
+        /* Grid layout */
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 30px;
+            align-items: stretch;
+        }
+
+        /* Cards */
+        .service-card, .pricing-card {
+            background: var(--card-bg);
+            padding: 40px;
+            border-radius: 25px;
+            border: 1px solid rgba(255,255,255,0.05);
+            transition: var(--transition-base);
+            cursor: default;
+            position: relative;
+            overflow: hidden;
+            transform-style: preserve-3d;
+            perspective: 1000px;
+        }
+
+        .service-card::before, .pricing-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, 
+                transparent, 
+                rgba(255, 255, 255, 0.1), 
+                transparent);
+            transition: 0.5s;
+            pointer-events: none;
+        }
+
+        .service-card:hover::before, .pricing-card:hover::before {
+            left: 100%;
+        }
+
+        .service-card:hover {
+            border-color: var(--accent-gold);
+            transform: translateY(-10px) rotateX(5deg) rotateY(-5deg);
+            background: rgba(20, 23, 26, 0.8);
+            box-shadow: 
+                0 25px 50px rgba(0, 0, 0, 0.4),
+                0 0 30px rgba(197, 160, 89, 0.1);
+        }
+
+        .service-card .icon {
+            font-size: 40px;
+            margin-bottom: 20px;
+            display: block;
+            transition: var(--transition-base);
+            animation: iconFloat 3s ease-in-out infinite;
+        }
+
+        .service-card:nth-child(1) .icon { animation-delay: 0s; }
+        .service-card:nth-child(2) .icon { animation-delay: 0.3s; }
+        .service-card:nth-child(3) .icon { animation-delay: 0.6s; }
+
+        @keyframes iconFloat {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-8px); }
+        }
+
+        .service-card h3 {
+            color: var(--accent-gold);
+            margin-bottom: 15px;
+        }
+
+        /* Pricing cards */
+        .pricing-card {
+            padding: 45px 40px;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            transition: 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .pricing-card:hover {
+            transform: translateY(-5px) rotateX(3deg);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.4);
+        }
+
+        .pricing-card.featured {
+            border: 2px solid var(--accent-gold);
+            transform: scale(1.03);
+            animation: featuredGlow 3s ease-in-out infinite;
+        }
+
+        @keyframes featuredGlow {
+            0%, 100% { box-shadow: 0 0 20px rgba(197, 160, 89, 0.3); }
+            50% { box-shadow: 0 0 40px rgba(197, 160, 89, 0.5), 0 25px 50px rgba(0, 0, 0, 0.3); }
+        }
+
+        .pricing-card.featured:hover {
+            transform: scale(1.05) translateY(-5px) rotateX(3deg);
+        }
+
+        .pricing-card.enterprise {
+            border: 2px solid var(--accent-green);
+            animation: enterpriseGlow 3s ease-in-out infinite;
+        }
+
+        @keyframes enterpriseGlow {
+            0%, 100% { box-shadow: 0 0 20px rgba(76, 175, 80, 0.2); }
+            50% { box-shadow: 0 0 30px rgba(76, 175, 80, 0.4); }
+        }
+
+        .pricing-card h3 {
+            font-size: 1.8rem;
+            margin: 0;
+            transition: var(--transition-base);
+        }
+
+        .pricing-card:hover h3 {
+            letter-spacing: 1px;
+        }
+
+        .price {
+            font-size: 3.5rem;
+            font-weight: 800;
+            margin: 25px 0;
+            position: relative;
+            display: inline-block;
+        }
+
+        .price::before {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 2px;
+            background: linear-gradient(90deg, var(--accent-gold), transparent);
+            transform: scaleX(0);
+            transform-origin: right;
+            transition: transform 0.5s ease;
+        }
+
+        .pricing-card:hover .price::before {
+            transform: scaleX(1);
+            transform-origin: left;
+        }
+
+        .price span {
+            font-size: 1rem;
+            color: var(--text-silver);
+            font-weight: 400;
+        }
+
+        /* Features list */
+        .features-list {
+            list-style: none;
+            padding: 0;
+            margin: 0 0 30px 0;
+            flex-grow: 1;
+        }
+
+        .features-list li {
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: var(--text-silver);
+            transition: var(--transition-base);
+            position: relative;
+            padding-right: 20px;
+        }
+
+        .features-list li::after {
+            content: '';
+            position: absolute;
+            right: 0;
+            top: 50%;
+            width: 0;
+            height: 2px;
+            background: var(--accent-gold);
+            transition: width 0.3s ease;
+            transform: translateY(-50%);
+        }
+
+        .pricing-card:hover .features-list li::after {
+            width: 10px;
+        }
+
+        .pricing-card:hover .features-list li {
+            color: var(--white);
+            transform: translateX(-5px);
+        }
+
+        .features-list li::before {
+            content: "✓";
+            color: var(--accent-gold);
+            font-weight: bold;
+            transition: transform 0.3s ease;
+        }
+
+        .pricing-card:hover .features-list li::before {
+            transform: scale(1.3);
+        }
+
+        /* Additional features */
+        .ad-feature {
+            background: rgba(76, 175, 80, 0.1);
+            padding: 15px;
+            border-radius: 15px;
+            border: 1px dashed var(--accent-green);
+            margin-top: 10px;
+            margin-bottom: 20px;
+            transition: var(--transition-base);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .ad-feature::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(76, 175, 80, 0.1) 0%, transparent 70%);
+            animation: adFeaturePulse 4s ease-in-out infinite;
+        }
+
+        @keyframes adFeaturePulse {
+            0%, 100% { transform: scale(1); opacity: 0.5; }
+            50% { transform: scale(1.1); opacity: 1; }
+        }
+
+        .pricing-card:hover .ad-feature {
+            background: rgba(76, 175, 80, 0.2);
+        }
+
+        .badge {
+            position: absolute;
+            top: -15px;
+            left: 50%;
+            transform: translateX(-50%);
+            padding: 6px 20px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 800;
+            text-transform: uppercase;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+            animation: badgePulse 2s ease-in-out infinite;
+        }
+
+        @keyframes badgePulse {
+            0%, 100% { transform: translateX(-50%) scale(1); }
+            50% { transform: translateX(-50%) scale(1.05); }
+        }
+
+        /* ========== AR Demo Section ========== */
+        .ar-demo-section {
+            padding: 80px 5%;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .ar-demo-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 50px;
+            align-items: center;
+        }
+
+        .ar-info {
+            padding: 20px;
+        }
+
+        .ar-info h2 {
+            font-size: 2.5rem;
+            margin-bottom: 20px;
+            background: linear-gradient(135deg, var(--accent-gold), var(--accent-green));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .ar-info p {
+            color: var(--text-silver);
+            font-size: 1.1rem;
+            line-height: 1.8;
+            margin-bottom: 25px;
+        }
+
+        .ar-features {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+
+        .ar-feature-item {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            padding: 15px;
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            transition: var(--transition-base);
+        }
+
+        .ar-feature-item:hover {
+            background: rgba(197, 160, 89, 0.1);
+            border-color: var(--accent-gold);
+            transform: translateX(-5px);
+        }
+
+        .ar-feature-item .feature-icon {
+            width: 45px;
+            height: 45px;
+            background: linear-gradient(135deg, var(--accent-gold), var(--accent-green));
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+        }
+
+        .ar-feature-item .feature-text {
+            flex: 1;
+        }
+
+        .ar-feature-item .feature-text h4 {
+            margin: 0 0 5px 0;
+            color: var(--white);
+            font-size: 1rem;
+        }
+
+        .ar-feature-item .feature-text p {
+            margin: 0;
+            font-size: 0.85rem;
+            color: var(--text-silver);
+        }
+
+        .ar-viewer-container {
+            position: relative;
+            border-radius: 25px;
+            overflow: hidden;
+            background: var(--card-bg);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 25px 60px rgba(0, 0, 0, 0.4);
+        }
+
+        model-viewer {
+            width: 100%;
+            height: 500px;
+            background: radial-gradient(circle at center, rgba(197, 160, 89, 0.05) 0%, transparent 70%);
+            --poster-color: transparent;
+        }
+
+        .ar-viewer-container::before {
+            content: '';
+            position: absolute;
+            top: -2px;
+            left: -2px;
+            right: -2px;
+            bottom: -2px;
+            background: linear-gradient(45deg, 
+                var(--accent-gold), 
+                transparent 30%, 
+                transparent 70%, 
+                var(--accent-green));
+            border-radius: 27px;
+            z-index: -1;
+            opacity: 0.3;
+            animation: arBorderGlow 4s ease-in-out infinite;
+        }
+
+        @keyframes arBorderGlow {
+            0%, 100% { opacity: 0.3; }
+            50% { opacity: 0.6; }
+        }
+
+        .ar-instructions {
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0, 0, 0, 0.8);
+            padding: 15px 25px;
+            border-radius: 50px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            animation: instructionPulse 2s ease-in-out infinite;
+        }
+
+        @keyframes instructionPulse {
+            0%, 100% { transform: translateX(-50%) scale(1); }
+            50% { transform: translateX(-50%) scale(1.02); }
+        }
+
+        .ar-instructions span {
+            font-size: 0.9rem;
+            color: var(--text-silver);
+        }
+
+        .ar-instructions .drag-icon {
+            width: 30px;
+            height: 30px;
+            background: var(--accent-gold);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            animation: dragAnimation 1.5s ease-in-out infinite;
+        }
+
+        @keyframes dragAnimation {
+            0%, 100% { transform: rotate(0deg); }
+            25% { transform: rotate(-15deg); }
+            75% { transform: rotate(15deg); }
+        }
+
+        /* Model Viewer Custom AR Button */
+        model-viewer::part(default-ar-button) {
+            display: none;
+        }
+
+        .custom-ar-button {
+            position: absolute;
+            bottom: 80px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 15px;
+            z-index: 10;
+        }
+
+        .ar-btn {
+            padding: 15px 30px;
+            border-radius: 50px;
+            border: none;
+            cursor: pointer;
+            font-family: 'Tajawal', sans-serif;
+            font-size: 1rem;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            transition: var(--transition-base);
+        }
+
+        .ar-btn-primary {
+            background: linear-gradient(135deg, var(--accent-gold), #d4a84b);
+            color: #000;
+            box-shadow: 0 10px 30px rgba(197, 160, 89, 0.3);
+        }
+
+        .ar-btn-primary:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 15px 40px rgba(197, 160, 89, 0.5);
+        }
+
+        .ar-btn-secondary {
+            background: rgba(255, 255, 255, 0.1);
+            color: var(--white);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .ar-btn-secondary:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: translateY(-3px);
+        }
+
+        /* Product Selection */
+        .product-selector {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .product-thumb {
+            width: 60px;
+            height: 60px;
+            border-radius: 12px;
+            background: var(--card-bg);
+            border: 2px solid transparent;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            transition: var(--transition-base);
+        }
+
+        .product-thumb:hover {
+            border-color: var(--accent-gold);
+            transform: scale(1.1);
+        }
+
+        .product-thumb.active {
+            border-color: var(--accent-gold);
+            box-shadow: 0 0 20px rgba(197, 160, 89, 0.3);
+        }
+
+        /* Demo Badge */
+        .demo-badge {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: linear-gradient(135deg, var(--accent-gold), var(--accent-green));
+            padding: 8px 20px;
+            border-radius: 50px;
+            font-size: 0.8rem;
+            font-weight: 700;
+            color: #000;
+            animation: demoBadgePulse 2s ease-in-out infinite;
+        }
+
+        @keyframes demoBadgePulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+
+        /* Device Compatibility Notice */
+        .device-notice {
+            text-align: center;
+            padding: 15px;
+            background: rgba(76, 175, 80, 0.1);
+            border-radius: 12px;
+            border: 1px dashed var(--accent-green);
+            margin-top: 20px;
+            font-size: 0.9rem;
+            color: var(--text-silver);
+        }
+
+        .device-notice strong {
+            color: var(--accent-green);
+        }
+
+        /* Footer */
+        footer {
+            padding: 60px 5%;
+            text-align: center;
+            border-top: 1px solid rgba(255,255,255,0.05);
+            position: relative;
+            overflow: hidden;
+        }
+
+        footer::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 200%;
+            height: 5px;
+            background: linear-gradient(90deg, 
+                transparent, 
+                var(--accent-gold), 
+                var(--accent-green), 
+                transparent);
+            animation: footerWave 3s linear infinite;
+        }
+
+        @keyframes footerWave {
+            0% { transform: translateX(-50%); }
+            100% { transform: translateX(0%); }
+        }
+
+        .footer-links a {
+            color: var(--accent-gold);
+            text-decoration: none;
+            margin: 0 10px;
+            transition: var(--transition-base);
+            position: relative;
+        }
+
+        .footer-links a::after {
+            content: '';
+            position: absolute;
+            bottom: -2px;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background: var(--accent-gold);
+            transition: width 0.3s ease;
+        }
+
+        .footer-links a:hover::after {
+            width: 100%;
+        }
+
+        .footer-links a:hover {
+            color: var(--white);
+            text-shadow: 0 0 10px var(--accent-gold);
+        }
+
+        /* Modal Animations */
+        #privacyModal, #hireModal {
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+        }
+
+        #privacyModal.active, #hireModal.active {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        #privacyModal > div, #hireModal > div {
+            transform: scale(0.8) translateY(30px);
+            opacity: 0;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        #privacyModal.active > div, #hireModal.active > div {
+            transform: scale(1) translateY(0);
+            opacity: 1;
+        }
+
+        input:focus, textarea:focus {
+            border-color: var(--accent-gold) !important;
+            box-shadow: 0 0 15px rgba(197, 160, 89, 0.3);
+            transform: scale(1.02);
+        }
+
+        input, textarea {
+            transition: all 0.3s ease !important;
+        }
+
+        /* Loading Animation */
+        .page-loader {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: var(--bg-color-1);
+            z-index: 99999;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            transition: opacity 0.5s ease, visibility 0.5s ease;
+        }
+
+        .page-loader.hidden {
+            opacity: 0;
+            visibility: hidden;
+        }
+
+        .loader-spinner {
+            width: 50px;
+            height: 50px;
+            border: 3px solid rgba(197, 160, 89, 0.2);
+            border-top-color: var(--accent-gold);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* Responsive design */
+        @media (max-width: 992px) {
+            .ar-demo-container {
+                grid-template-columns: 1fr;
+                gap: 30px;
+            }
+            
+            model-viewer {
+                height: 400px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .hero h1 { 
+                font-size: 2.5rem; 
+            }
+            .pricing-card.featured { 
+                transform: scale(1); 
+            }
+            .pricing-card.featured:hover { 
+                transform: scale(1.02); 
+            }
+            .btn {
+                width: 11rem;
+                height: 2.5rem;
+            }
+            .btn strong {
+                font-size: 14px;
+            }
+            .scroll-indicator {
+                display: none;
+            }
+            .service-card:hover, .pricing-card:hover {
+                transform: translateY(-5px);
+            }
+            model-viewer {
+                height: 350px;
+            }
+            .custom-ar-button {
+                flex-direction: column;
+                bottom: 70px;
+            }
+            .ar-btn {
+                padding: 12px 25px;
+                font-size: 0.9rem;
+            }
+            .ar-info h2 {
+                font-size: 1.8rem;
+            }
+        }
+
+        /* Reduced motion */
+        @media (prefers-reduced-motion: reduce) {
+            *, *::before, *::after {
+                animation-duration: 0.01ms !important;
+                animation-iteration-count: 1 !important;
+                transition-duration: 0.01ms !important;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Page Loader -->
+    <div class="page-loader" id="pageLoader">
+        <div class="loader-spinner"></div>
+    </div>
+
+    <!-- Scroll Progress -->
+    <div class="scroll-progress" id="scrollProgress"></div>
+
+    <!-- Animated Background -->
+    <div class="animated-bg"></div>
+
+    <!-- Particles -->
+    <div class="particles-container" id="particlesContainer"></div>
+
+    <div class="bg-glow" id="glow"></div>
+
+    <header class="hero">
+        <h1 data-aos="zoom-out-up">مستقبل التجارة بين يديك</h1>
+        <p data-aos="fade-up" data-aos-delay="200">نحن لا نصمم مواقع، نحن نبني متاجر إلكترونية غامرة تعتمد على الواقع المعزز (AR) لتحويل زوارك إلى عملاء دائمين.</p>
+        <div class="hero-btns btn-wrapper" data-aos="fade-up" data-aos-delay="400">
+            <a href="#ar-demo" class="btn btn-gold" aria-label="جرب AR الآن">
+                <div id="container-stars">
+                    <div id="stars"></div>
+                </div>
+                <div id="glow">
+                    <div class="circle"></div>
+                    <div class="circle"></div>
+                </div>
+                <strong>جرب AR الآن</strong>
+            </a>
+        </div>
+
+        <div class="scroll-indicator">
+            <span></span>
+        </div>
+    </header>
+
+    <main>
+        <div class="project-description" data-aos="fade-up" data-aos-delay="600">
+            <h2>اكتشف مستقبل التجارة الإلكترونية مع <span class="gold-text">Dimension AR</span>!</h2>
+            <p>في عصر تتطور فيه التقنية باستمرار، نقدم لك <strong>Dimension AR</strong>، حيث نجمع بين التجارة الإلكترونية وواقع معزز لتقديم تجربة فريدة ومبتكرة تسهم في تحويل زوارك إلى عملاء دائمين.</p>
+            <p>نحن لا نصمم مواقع عادية، بل نبني متاجر إلكترونية غامرة تمزج بين العالمين الرقمي والفعلي. باستخدام تقنيات الواقع المعزز، يمكنك الآن عرض المنتجات في بيئتك الخاصة، الاستمتاع بتفاعلات ثلاثية الأبعاد مذهلة، وتخصيص الهوية البصرية لمتجرك.</p>
+            <p>انضم إلى ثورة التجارة الإلكترونية مع <strong>Dimension AR</strong> واجعل تجربة التسوق لعملائك تجربة لا تُنسى!</p>
+        </div>
+
+        <!-- ========== AR DEMO SECTION ========== -->
+        <section class="ar-demo-section" id="ar-demo">
+            <h2 class="section-title" data-aos="fade-down">جرّب <span>الواقع المعزز</span> الآن</h2>
+            
+            <div class="ar-demo-container">
+                <div class="ar-info" data-aos="fade-left">
+                    <h2>🚀 استكشف المنتج في بيتك!</h2>
+                    <p>جرّب الآن كيف يمكن لعملائك معاينة المنتجات في بيئتهم الحقيقية قبل الشراء. هذه التجربة التفاعلية توضح قوة تقنية الواقع المعزز في زيادة الثقة وتقليل نسبة المرتجعات.</p>
+                    
+                    <div class="ar-features">
+                        <div class="ar-feature-item">
+                            <div class="feature-icon">📱</div>
+                            <div class="feature-text">
+                                <h4>تفاعل باللمس</h4>
+                                <p>قم بتدوير وتكبير المجسم بسحب أصبعك</p>
+                            </div>
+                        </div>
+                        <div class="ar-feature-item">
+                            <div class="feature-icon">🏠</div>
+                            <div class="feature-text">
+                                <h4>عرض في الواقع</h4>
+                                <p>اضغط "شاهد في غرفتك" لتجربة AR الحقيقية</p>
+                            </div>
+                        </div>
+                        <div class="ar-feature-item">
+                            <div class="feature-icon">✨</div>
+                            <div class="feature-text">
+                                <h4>جودة عالية</h4>
+                                <p>مجسمات ثلاثية الأبعاد بدقة استثنائية</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="device-notice">
+                        <strong>💡 ملاحظة:</strong> ميزة "شاهد في غرفتك" تعمل على أجهزة Android/iOS الداعمة لـ AR
+                    </div>
+                </div>
+
+                <div class="ar-viewer-container" data-aos="fade-right">
+                    <div class="demo-badge">تجربة تفاعلية</div>
+                    
+                    <model-viewer
+                        id="ar-model"
+                        src="https://modelviewer.dev/shared-assets/models/Astronaut.glb"
+                        alt="مجسم ثلاثي الأبعاد تجريبي"
+                        ar
+                        ar-modes="webxr scene-viewer quick-look"
+                        camera-controls
+                        touch-action="pan-y"
+                        auto-rotate
+                        shadow-intensity="1"
+                        environment-image="neutral"
+                        exposure="1"
+                        style="background: radial-gradient(circle at center, rgba(197, 160, 89, 0.08) 0%, transparent 60%);"
+                    >
+                        <div class="custom-ar-button" slot="ar-button">
+                            <button class="ar-btn ar-btn-primary" id="viewInAR">
+                                📷 شاهد في غرفتك
+                            </button>
+                            <button class="ar-btn ar-btn-secondary" id="resetView">
+                                🔄 إعادة ضبط
+                            </button>
+                        </div>
+                    </model-viewer>
+
+                    <div class="ar-instructions">
+                        <div class="drag-icon">👆</div>
+                        <span>اسحب للتدوير • اضغط باصبعين للتكبير</span>
+                    </div>
+                    
+                    <!-- Product Selector -->
+                    <div class="product-selector">
+                        <div class="product-thumb active" data-model="astronaut" title="رائد الفضاء">
+                            🧑‍🚀
+                        </div>
+                        <div class="product-thumb" data-model="shishkebab" title="شيش كباب">
+                            🛋️
+                        </div>
+                        <div class="product-thumb" data-model="robot" title="روبوت">
+                            🤖
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="section" aria-labelledby="features-title">
+            <h2 id="features-title" class="section-title" data-aos="fade-down">لماذا تختار <span>Dimension AR</span>؟</h2>
+            <div class="grid">
+                <article class="service-card" data-aos="fade-left" data-aos-delay="100">
+                    <span class="icon" aria-hidden="true">🛍️</span>
+                    <h3>متاجر AR متكاملة</h3>
+                    <p>متجر إلكتروني حديث يدعم عرض المنتجات داخل بيئة العميل الحقيقية بضغطة زر واحدة.</p>
+                </article>
+                <article class="service-card" data-aos="fade-left" data-aos-delay="200">
+                    <span class="icon" aria-hidden="true">✨</span>
+                    <h3>نمذجة فائقة الدقة</h3>
+                    <p>باستخدام الذكاء الاصطناعي لضمان أعلى جودة.</p>
+                </article>
+                <article class="service-card" data-aos="fade-left" data-aos-delay="300">
+                    <span class="icon" aria-hidden="true">📈</span>
+                    <h3>عائد استثماري</h3>
+                    <p>تقليل نسبة مرتجعات المنتجات وزيادة ثقة العميل عبر المعاينة الواقعية قبل الشراء.</p>
+                </article>
+            </div>
+        </section>
+
+        <section class="section" id="how-it-works">
+            <h2 class="section-title">كيف نُحيي <span>منتجاتك؟</span></h2>
+            <div class="grid">
+                <div class="service-card" data-aos="fade-right">
+                    <div style="font-size: 35px; color: var(--accent-gold);">1. النمذجة الرقمية</div>
+                    <p>نأخذ صور منتجك العادية ونحولها إلى مجسم 3D عالي الدقة، مع مراعاة التفاصيل الدقيقة للأنسجة والألوان.</p>
+                </div>
+
+                <div class="service-card" data-aos="fade-up">
+                    <div style="font-size: 35px; color: var(--accent-gold);">2. دمج الواقع المعزز</div>
+                    <p>نربط المجسم بتقنية الـ AR، بحيث يمكن للعميل "وضعه" في غرفته عبر كاميرا هاتفه بضغطة زر واحدة.</p>
+                </div>
+
+                <div class="service-card" data-aos="fade-left">
+                    <div style="font-size: 35px; color: var(--accent-gold);">3. الانغماس الشرائي</div>
+                    <p>عندما يرى العميل المنتج داخل بيئته الحقيقية، يزداد معدل الثقة بنسبة 70%، مما يقوده لإنهاء عملية الشراء فوراً.</p>
+                </div>
+            </div>
+        </section>
+
+        <section class="section" id="pricing" aria-labelledby="pricing-title">
+            <h2 id="pricing-title" class="section-title" data-aos="fade-down">اختر <span>خطتك الاستثمارية</span></h2>
+            <div class="grid">
+                <article class="pricing-card" data-aos="flip-right" data-aos-delay="100">
+                    <h3>الاقتصادية</h3>
+                    <div class="price">29$ <span>/شهرياً</span></div>
+                    <ul class="features-list">
+                        <li>متجر إلكتروني AR</li>
+                        <li>3 منتجات 3D</li>
+                        <li>لوحة تحكم أساسية</li>
+                        <li>دعم عبر البريد</li>
+                    </ul>
+                    <a href="https://www.paypal.com/ncp/payment/JUR2KR9A56APU" class="btn btn-gold" 
+                       aria-label="ابدأ الآن بالباقة الاقتصادية">
+                        <div id="container-stars">
+                            <div id="stars"></div>
+                        </div>
+                        <div id="glow">
+                            <div class="circle"></div>
+                            <div class="circle"></div>
+                        </div>
+                        <strong>ابدأ الآن</strong>
+                    </a>
+                </article>
+
+                <article class="pricing-card featured" data-aos="flip-right" data-aos-delay="200">
+                    <div class="badge" style="background: var(--accent-gold); color: #000;">الأكثر طلباً</div>
+                    <h3>باقة النمو</h3>
+                    <div class="price">149$ <span>/شهرياً</span></div>
+                    <ul class="features-list">
+                        <li>متجر إلكتروني متكامل</li>
+                        <li>15 منتج 3D "قابل للزيادة"</li>
+                        <li>تخصيص الهوية البصرية</li>
+                        <li>دعم فني سريع</li>
+                    </ul>
+                    <a href="https://www.paypal.com/ncp/payment/JCPZ7WWTNJP5L" class="btn btn-gold"
+                       aria-label="اشترك الآن في باقة النمو">
+                        <div id="container-stars">
+                            <div id="stars"></div>
+                        </div>
+                        <div id="glow">
+                            <div class="circle"></div>
+                            <div class="circle"></div>
+                        </div>
+                        <strong>اشترك الآن</strong>
+                    </a>
+                </article>
+
+                <article class="pricing-card enterprise" data-aos="flip-right" data-aos-delay="300">
+                    <div class="badge" style="background: var(--accent-green); color: #fff;">للشركات الكبرى</div>
+                    <h3>المؤسسات</h3>
+                    <div class="price">299$ <span>/شهرياً</span></div>
+                    <ul class="features-list">
+                        <li>متجر Pro فائق السرعة</li>
+                        <li>50 منتج 3D احترافي "قابل للزيادة"</li>
+                        <li>أولوية في النمذجة</li>
+                        <div class="ad-feature">
+                            <strong style="color: var(--accent-green);">💰 دخل سلبي:</strong>
+                            <p style="font-size: 13px; margin: 5px 0 0 0;">فتح خاصية "المساحات الإعلانية" لتأجيرها لمعلنين داخل متجرك.</p>
+                        </div>
+                    </ul>
+                    <a href="https://www.paypal.com/ncp/payment/67R7AGEPPYT6L" class="btn btn-green"
+                       aria-label="تواصل معنا حول باقة المؤسسات">
+                        <div id="container-stars">
+                            <div id="stars"></div>
+                        </div>
+                        <div id="glow">
+                            <div class="circle"></div>
+                            <div class="circle"></div>
+                        </div>
+                        <strong>تواصل معنا</strong>
+                    </a>
+                </article>
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <p>&copy; 2026 Dimension AR. جميع الحقوق محفوظة.</p>
+        <nav class="footer-links" aria-label="روابط تذييل الصفحة">
+            <a href="#" aria-label="سياسة الخصوصية">سياسة الخصوصية</a>
+            <span aria-hidden="true">|</span>
+            <a href="mailto:hire@dimension.com" aria-label="انضم كرسام 3D">انضم كرسام 3D</a>
+        </nav>
+    </footer>
+
+    <script>
+        // Page Loader
+        window.addEventListener('load', () => {
+            setTimeout(() => {
+                document.getElementById('pageLoader').classList.add('hidden');
+            }, 500);
+        });
+
+        // Create Floating Particles
+        function createParticles() {
+            const container = document.getElementById('particlesContainer');
+            const particleCount = 30;
+            
+            for (let i = 0; i < particleCount; i++) {
+                const particle = document.createElement('div');
+                particle.classList.add('particle');
+                particle.style.left = Math.random() * 100 + '%';
+                particle.style.animationDelay = Math.random() * 8 + 's';
+                particle.style.animationDuration = (Math.random() * 4 + 6) + 's';
+                particle.style.width = (Math.random() * 4 + 2) + 'px';
+                particle.style.height = particle.style.width;
+                container.appendChild(particle);
+            }
+        }
+        createParticles();
+
+        // Initialize AOS
+        document.addEventListener('DOMContentLoaded', () => {
+            AOS.init({
+                duration: 800,
+                once: true,
+                easing: 'ease-out'
+            });
+
+            // Glow effect
+            const glow = document.getElementById('glow');
+            let ticking = false;
+            
+            window.addEventListener('mousemove', (e) => {
+                if (!ticking) {
+                    window.requestAnimationFrame(() => {
+                        const x = (e.clientX / window.innerWidth) * 100;
+                        const y = (e.clientY / window.innerHeight) * 100;
+                        glow.style.setProperty('--x', `${x}%`);
+                        glow.style.setProperty('--y', `${y}%`);
+                        ticking = false;
+                    });
+                    ticking = true;
+                }
+            });
+
+            // Scroll Progress
+            window.addEventListener('scroll', () => {
+                const scrollProgress = document.getElementById('scrollProgress');
+                const scrollTop = document.documentElement.scrollTop;
+                const scrollHeight = document.documentElement.scrollHeight - document.documentElement.clientHeight;
+                const progress = (scrollTop / scrollHeight) * 100;
+                scrollProgress.style.width = progress + '%';
+            });
+
+            // Button Ripple Effect
+            document.querySelectorAll('.btn').forEach(btn => {
+                btn.addEventListener('click', function(e) {
+                    const ripple = document.createElement('span');
+                    ripple.classList.add('ripple');
+                    const rect = this.getBoundingClientRect();
+                    const size = Math.max(rect.width, rect.height);
+                    ripple.style.width = ripple.style.height = size + 'px';
+                    ripple.style.left = e.clientX - rect.left - size / 2 + 'px';
+                    ripple.style.top = e.clientY - rect.top - size / 2 + 'px';
+                    this.appendChild(ripple);
+                    setTimeout(() => ripple.remove(), 600);
+                });
+            });
+
+            // 3D Card Tilt Effect
+            document.querySelectorAll('.service-card, .pricing-card').forEach(card => {
+                card.addEventListener('mousemove', function(e) {
+                    const rect = this.getBoundingClientRect();
+                    const x = e.clientX - rect.left;
+                    const y = e.clientY - rect.top;
+                    const centerX = rect.width / 2;
+                    const centerY = rect.height / 2;
+                    const rotateX = (y - centerY) / 20;
+                    const rotateY = (centerX - x) / 20;
+                    
+                    this.style.transform = `translateY(-10px) rotateX(${rotateX}deg) rotateY(${rotateY}deg)`;
+                });
+
+                card.addEventListener('mouseleave', function() {
+                    if (this.classList.contains('featured')) {
+                        this.style.transform = 'scale(1.03)';
+                    } else {
+                        this.style.transform = '';
+                    }
+                });
+            });
+
+            // Smooth Scroll for Anchor Links
+            document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+                anchor.addEventListener('click', function(e) {
+                    const href = this.getAttribute('href');
+                    if (href !== '#') {
+                        e.preventDefault();
+                        const target = document.querySelector(href);
+                        if (target) {
+                            target.scrollIntoView({
+                                behavior: 'smooth',
+                                block: 'start'
+                            });
+                        }
+                    }
+                });
+            });
+
+            // Price Counter Animation
+            const observerOptions = { threshold: 0.5 };
+            const priceObserver = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        const priceEl = entry.target;
+                        const finalPrice = parseInt(priceEl.textContent);
+                        let currentPrice = 0;
+                        const increment = finalPrice / 30;
+                        const counter = setInterval(() => {
+                            currentPrice += increment;
+                            if (currentPrice >= finalPrice) {
+                                priceEl.innerHTML = finalPrice + '$ <span>/شهرياً</span>';
+                                clearInterval(counter);
+                            } else {
+                                priceEl.innerHTML = Math.floor(currentPrice) + '$ <span>/شهرياً</span>';
+                            }
+                        }, 30);
+                        priceObserver.unobserve(priceEl);
+                    }
+                });
+            }, observerOptions);
+
+            document.querySelectorAll('.price').forEach(price => {
+                priceObserver.observe(price);
+            });
+
+            // ========== AR MODEL VIEWER CONTROLS ==========
+            const modelViewer = document.getElementById('ar-model');
+            const resetBtn = document.getElementById('resetView');
+            const arBtn = document.getElementById('viewInAR');
+            const productThumbs = document.querySelectorAll('.product-thumb');
+
+            // Model URLs
+            const models = {
+                astronaut: 'https://modelviewer.dev/shared-assets/models/Astronaut.glb',
+                shishkebab: 'https://modelviewer.dev/shared-assets/models/shishkebab.glb',
+                robot: 'https://modelviewer.dev/shared-assets/models/robotexpressive.glb'
+            };
+
+            // Reset View
+            resetBtn.addEventListener('click', () => {
+                modelViewer.cameraOrbit = 'auto auto auto';
+                modelViewer.fieldOfView = 'auto';
+                modelViewer.cameraTarget = 'auto auto auto';
+            });
+
+            // Trigger AR
+            arBtn.addEventListener('click', () => {
+                if (modelViewer.canActivateAR) {
+                    modelViewer.activateAR();
+                } else {
+                    alert('جهازك لا يدعم تقنية AR. جرب على هاتف محمول داعم لـ AR.');
+                }
+            });
+
+            // Product Selection
+            productThumbs.forEach(thumb => {
+                thumb.addEventListener('click', function() {
+                    productThumbs.forEach(t => t.classList.remove('active'));
+                    this.classList.add('active');
+                    
+                    const modelName = this.dataset.model;
+                    modelViewer.src = models[modelName];
+                });
+            });
+
+            // Check AR Support
+            modelViewer.addEventListener('ar-status', (e) => {
+                if (e.detail.status === 'not-presenting') {
+                    arBtn.style.opacity = '1';
+                    arBtn.style.pointerEvents = 'auto';
+                }
+            });
+
+            modelViewer.addEventListener('ar-tracking', (e) => {
+                console.log('AR Tracking:', e.detail.status);
+            });
+        });
+    </script>
+
+    <!-- Privacy Modal -->
+    <div id="privacyModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.95); z-index:10000; justify-content:center; align-items:center; backdrop-filter: blur(10px);">
+        <div style="background:var(--card-bg); padding:40px; border-radius:30px; max-width:700px; width:90%; max-height:85vh; overflow-y:auto; border:1px solid var(--accent-gold); position:relative; box-shadow: 0 0 50px rgba(197, 160, 89, 0.2);">
+            
+            <button onclick="togglePrivacy()" style="position:absolute; top:20px; left:20px; background:transparent; border:none; color:var(--white); cursor:pointer; font-size:24px; transition: 0.3s;">✕</button>
+            
+            <h2 style="color:var(--accent-gold); text-align:center; font-size:1.8rem; margin-bottom:30px; font-weight:800;">سياسة الخصوصية لـ Dimension AR</h2>
+            
+            <div style="text-align:right; font-size:15px; color:var(--text-silver); line-height:1.8;">
+                <p style="color: var(--white); border-right: 3px solid var(--accent-gold); padding-right: 10px;">نحن في <strong>Dimension AR</strong> نلتزم بحماية بياناتك الشخصية وفقاً لأفضل الممارسات والمعايير الأمنية، بما يتماشى مع "نظام حماية البيانات الشخصية" (SDAIA).</p>
+                
+                <h4 style="color:var(--white); margin-top:25px;">1. البيانات التي نجمعها</h4>
+                <p>لا يقوم موقعنا بجمع بيانات تلقائية عن هويتك. البيانات الوحيدة التي نحصل عليها هي تلك التي تزودنا بها طوعاً عند مراسلتنا عبر "واتساب" أو البريد الإلكتروني (مثل الاسم وتفاصيل مشروعك).</p>
+
+                <h4 style="color:var(--white); margin-top:20px;">2. كيف نستخدم بياناتك</h4>
+                <p>نستخدم معلوماتك لغرض وحيد وهو تقديم الدعم الفني، معالجة طلبات بناء المتاجر، وتحسين جودة النماذج ثلاثية الأبعاد المقدمة لك.</p>
+
+                <h4 style="color:var(--white); margin-top:20px;">3. ملفات تعريف الارتباط (Cookies)</h4>
+                <p>يستخدم الموقع ملفات تعريف ارتباط "تقنية" فقط لضمان عمل الأنميشن والتأثيرات البصرية بسلاسة، ولا نستخدم أي ملفات تتبع لأغراض إعلانية خارجية.</p>
+
+                <h4 style="color:var(--white); margin-top:20px;">4. حماية ومشاركة البيانات</h4>
+                <p>نحن نطبق بروتوكولات تشفير متقدمة لحماية تواصلنا معك، ونلتزم التزاماً تاماً بعدم بيع أو مشاركة بياناتك مع أي طرف ثالث تحت أي ظرف.</p>
+
+                <h4 style="color:var(--white); margin-top:20px;">5. حقوقك</h4>
+                <p>لك الحق الكامل في طلب حذف مراسلاتك أو تعديل معلوماتك في أي وقت عبر التواصل معنا مباشرة.</p>
+            </div>
+
+            <div style="text-align:center; margin-top:40px;">
+                <button onclick="togglePrivacy()" class="btn btn-gold" style="width:100%; max-width:200px; margin:0 auto;">
+                    <div id="container-stars"><div id="stars"></div></div>
+                    <strong>فهمت ذلك</strong>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function togglePrivacy() {
+            const modal = document.getElementById('privacyModal');
+            if (modal.style.display === 'none' || modal.style.display === '') {
+                modal.style.display = 'flex';
+                modal.classList.add('active');
+                document.body.style.overflow = 'hidden';
+            } else {
+                modal.classList.remove('active');
+                setTimeout(() => {
+                    modal.style.display = 'none';
+                }, 300);
+                document.body.style.overflow = 'auto';
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const privacyLink = document.querySelector('a[aria-label="سياسة الخصوصية"]');
+            if (privacyLink) {
+                privacyLink.setAttribute('href', 'javascript:void(0)');
+                privacyLink.setAttribute('onclick', 'togglePrivacy()');
+            }
+        });
+    </script>
+
+    <!-- Hire Modal -->
+    <div id="hireModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.95); z-index:10000; justify-content:center; align-items:center; backdrop-filter: blur(10px);">
+        <div style="background:var(--card-bg); padding:30px; border-radius:30px; max-width:500px; width:90%; border:1px solid var(--accent-gold); position:relative; box-shadow: 0 0 30px rgba(197, 160, 89, 0.1);">
+            
+            <button onclick="toggleHire()" style="position:absolute; top:15px; left:15px; background:transparent; border:none; color:var(--white); cursor:pointer; font-size:20px;">✕</button>
+            
+            <h3 style="color:var(--accent-gold); text-align:center; margin-bottom:10px;">انضم لفريق المبدعين</h3>
+            
+            <p style="color: var(--text-silver); text-align: center; font-size: 13px; margin-bottom: 25px; padding: 10px; background: rgba(197, 160, 89, 0.05); border-radius: 10px; border: 1px dashed rgba(197, 160, 89, 0.3);">
+                📩 سيتم مراجعة طلبك من قبل فريقنا التقني، والرد عليك عبر <strong>بريدك الإلكتروني</strong> فور الانتهاء من التقييم.
+            </p>
+            
+            <form action="https://formspree.io/f/mkovyowr" method="POST" style="display:flex; flex-direction:column; gap:15px;">
+                <input type="text" name="name" placeholder="الاسم الكامل" required style="padding:12px; border-radius:10px; border:1px solid #333; background:#1a1a1a; color:white; font-family:'Tajawal'; outline: none;">
+                
+                <input type="email" name="email" placeholder="البريد الإلكتروني" required style="padding:12px; border-radius:10px; border:1px solid #333; background:#1a1a1a; color:white; font-family:'Tajawal'; outline: none;">
+                
+                <input type="url" name="portfolio" placeholder="رابط معرض أعمالك (Portfolio)" required style="padding:12px; border-radius:10px; border:1px solid #333; background:#1a1a1a; color:white; font-family:'Tajawal'; outline: none;">
+                
+                <textarea name="message" placeholder="نبذة قصيرة عن خبرتك في الـ 3D" rows="3" style="padding:12px; border-radius:10px; border:1px solid #333; background:#1a1a1a; color:white; font-family:'Tajawal'; resize:none; outline: none;"></textarea>
+
+                <button type="submit" class="btn btn-gold" style="width:100%; margin-top:10px; height: 3.5rem;">
+                    <div id="container-stars"><div id="stars"></div></div>
+                    <strong>إرسال الطلب الآن</strong>
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        function toggleHire() {
+            const modal = document.getElementById('hireModal');
+            if (modal.style.display === 'none' || modal.style.display === '') {
+                modal.style.display = 'flex';
+                modal.classList.add('active');
+                document.body.style.overflow = 'hidden';
+            } else {
+                modal.classList.remove('active');
+                setTimeout(() => {
+                    modal.style.display = 'none';
+                }, 300);
+                document.body.style.overflow = 'auto';
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const hireLink = document.querySelector('a[aria-label="انضم كرسام 3D"]');
+            if (hireLink) {
+                hireLink.setAttribute('href', 'javascript:void(0)');
+                hireLink.setAttribute('onclick', 'toggleHire()');
+            }
+        });
+    </script>
+</body>
+</html>
