@@ -1080,6 +1080,27 @@
             border-radius: 15px;
         }
 
+        /* ========== FIX: AR Overlay Button Controls ========== */
+        .model-btn, .scale-btn, .ar-record-btn, .ar-reset-btn, .ar-rotation-dial, .joystick-stick {
+            pointer-events: auto !important;
+            touch-action: manipulation;
+        }
+        
+        /* Ensure AR overlay buttons are clickable */
+        .ar-interactive-overlay button,
+        .ar-interactive-overlay .ar-joystick,
+        .ar-interactive-overlay .ar-rotation-dial,
+        .ar-interactive-overlay .ar-scale-control {
+            pointer-events: auto !important;
+            touch-action: manipulation;
+        }
+        
+        .ar-interactive-overlay .joystick-base,
+        .ar-interactive-overlay .joystick-stick {
+            pointer-events: auto !important;
+            touch-action: none;
+        }
+
         /* ========== Footer ========== */
         footer {
             padding: 2rem 1.5rem;
@@ -1655,8 +1676,8 @@
                         environment-image="neutral"
                         exposure="1"
                     >
-                        <!-- AR Interactive Overlay -->
-                        <div class="ar-interactive-overlay" slot="ar-button">
+                        <!-- AR Interactive Overlay - FIXED: Removed slot="ar-button" -->
+                        <div class="ar-interactive-overlay">
                             <!-- Virtual Joystick for Movement -->
                             <div class="ar-joystick-container" id="joystickContainer">
                                 <div class="joystick-label">🎯 اسحب للتحريك</div>
@@ -1675,9 +1696,9 @@
                             <div class="ar-side-controls">
                                 <!-- Scale Controls -->
                                 <div class="ar-scale-control">
-                                    <button class="scale-btn" onclick="scaleModel(1.2)">+</button>
+                                    <button class="scale-btn" id="scaleUp">+</button>
                                     <span class="scale-label">تكبير</span>
-                                    <button class="scale-btn" onclick="scaleModel(0.8)">−</button>
+                                    <button class="scale-btn" id="scaleDown">−</button>
                                 </div>
                                 
                                 <!-- Rotation Control -->
@@ -1691,13 +1712,13 @@
                                 </div>
                                 
                                 <!-- Record Button -->
-                                <button class="ar-record-btn" id="recordBtn" onclick="toggleRecording()">
+                                <button class="ar-record-btn" id="recordBtn">
                                     <span class="record-icon">🔴</span>
                                     <span class="record-text">تسجيل</span>
                                 </button>
                                 
                                 <!-- Reset Button -->
-                                <button class="ar-reset-btn" onclick="resetModel()">
+                                <button class="ar-reset-btn" id="resetBtn">
                                     <span>↺</span>
                                     <span class="reset-text">إعادة</span>
                                 </button>
@@ -1997,7 +2018,7 @@
         function scaleModel(factor) {
             currentScale *= factor;
             currentScale = Math.max(0.3, Math.min(3, currentScale));
-            modelViewer.scale = `${currentScale} ${currentScale} ${currentScale}`;
+            modelViewer.scale = currentScale + ' ' + currentScale + ' ' + currentScale;
             
             // Visual feedback
             const scaleBtns = document.querySelectorAll('.scale-btn');
@@ -2006,6 +2027,10 @@
                 setTimeout(() => btn.style.transform = '', 150);
             });
         }
+
+        // Setup scale buttons
+        document.getElementById('scaleUp').addEventListener('click', () => scaleModel(1.2));
+        document.getElementById('scaleDown').addEventListener('click', () => scaleModel(0.8));
 
         // Rotate Model with Dial
         function initRotationDial() {
@@ -2041,8 +2066,8 @@
                 const rect = dialInner.getBoundingClientRect();
                 const angle = getAngle(e, rect);
                 currentRotation = angle - startAngle;
-                dialInner.style.transform = `rotate(${currentRotation}deg)`;
-                modelViewer.orientation = `0deg 0deg ${currentRotation}deg`;
+                dialInner.style.transform = 'rotate(' + currentRotation + 'deg)';
+                modelViewer.orientation = '0deg 0deg ' + currentRotation + 'deg';
             }
 
             function stopDrag() {
@@ -2091,7 +2116,7 @@
                 }
                 
                 // Move stick visually
-                stick.style.transform = `translate(calc(-50% + ${deltaX}px), calc(-50% + ${deltaY}px))`;
+                stick.style.transform = 'translate(calc(-50% + ' + deltaX + 'px), calc(-50% + ' + deltaY + 'px))';
                 
                 // Calculate movement (normalize and apply)
                 const moveX = deltaX / maxDistance * 0.02;
@@ -2126,8 +2151,8 @@
         function updateModelPosition() {
             // In AR mode, we use orientation and scale
             // The model-viewer handles position via its internal AR systems
-            modelViewer.orientation = `0deg 0deg ${currentRotation}deg`;
-            modelViewer.scale = `${currentScale} ${currentScale} ${currentScale}`;
+            modelViewer.orientation = '0deg 0deg ' + currentRotation + 'deg';
+            modelViewer.scale = currentScale + ' ' + currentScale + ' ' + currentScale;
         }
 
         // Reset Model
@@ -2158,6 +2183,7 @@
         });
 
         document.getElementById('resetView').addEventListener('click', resetModel);
+        document.getElementById('resetBtn').addEventListener('click', resetModel);
 
         document.getElementById('viewInAR').addEventListener('click', () => {
             if (modelViewer.canActivateAR) {
@@ -2194,6 +2220,8 @@
             }
         }
 
+        document.getElementById('recordBtn').addEventListener('click', toggleRecording);
+
         async function startRecording() {
             try {
                 const canvas = document.querySelector('model-viewer').shadowRoot.querySelector('canvas');
@@ -2220,7 +2248,7 @@
                     // Create download link
                     const a = document.createElement('a');
                     a.href = url;
-                    a.download = `AR_Recording_${Date.now()}.webm`;
+                    a.download = 'AR_Recording_' + Date.now() + '.webm';
                     document.body.appendChild(a);
                     a.click();
                     document.body.removeChild(a);
