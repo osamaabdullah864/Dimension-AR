@@ -841,102 +841,243 @@
             color: var(--primary-light);
         }
 
-        /* ========== AR Controls Panel ========== */
-        .ar-controls-panel {
+        /* ========== AR Interactive Overlay ========== */
+        .ar-interactive-overlay {
             position: absolute;
-            bottom: 30px;
+            bottom: 20px;
             left: 50%;
             transform: translateX(-50%);
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            grid-template-rows: repeat(4, auto);
-            gap: 10px;
+            display: none;
+            align-items: flex-end;
+            gap: 15px;
             z-index: 9999;
             pointer-events: auto;
-            width: 240px;
+            padding: 15px;
+            background: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            border: 1px solid rgba(99, 102, 241, 0.3);
         }
 
-        model-viewer:not([ar-status="session-started"]) .ar-controls-panel {
-            display: none;
+        model-viewer[ar-status="session-started"] .ar-interactive-overlay {
+            display: flex;
         }
 
-        .ar-spacer {
-            visibility: hidden;
-            height: 50px;
-        }
-
-        .ar-fixed-btn {
-            background: rgba(26, 26, 26, 0.9);
-            color: white;
-            border: 1.5px solid var(--primary);
-            border-radius: 12px;
-            height: 50px;
-            font-size: 14px;
+        /* Joystick Container */
+        .ar-joystick-container {
             display: flex;
             flex-direction: column;
             align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            backdrop-filter: blur(5px);
-            -webkit-tap-highlight-color: transparent;
-            font-family: 'Cairo', sans-serif;
-            transition: all 0.3s;
+            gap: 8px;
+        }
+
+        .joystick-label {
+            font-size: 11px;
+            color: rgba(255, 255, 255, 0.8);
+            text-align: center;
+        }
+
+        .ar-joystick {
+            position: relative;
+        }
+
+        .joystick-base {
+            width: 100px;
+            height: 100px;
+            background: radial-gradient(circle, rgba(99, 102, 241, 0.3) 0%, rgba(26, 26, 26, 0.9) 70%);
+            border: 2px solid rgba(99, 102, 241, 0.5);
+            border-radius: 50%;
+            position: relative;
+            touch-action: none;
+        }
+
+        .joystick-direction {
+            position: absolute;
+            font-size: 12px;
+            color: rgba(255, 255, 255, 0.4);
             user-select: none;
         }
 
-        .ar-fixed-btn:active {
-            background: var(--primary);
+        .joystick-direction.up { top: 8px; left: 50%; transform: translateX(-50%); }
+        .joystick-direction.down { bottom: 8px; left: 50%; transform: translateX(-50%); }
+        .joystick-direction.left { left: 8px; top: 50%; transform: translateY(-50%); }
+        .joystick-direction.right { right: 8px; top: 50%; transform: translateY(-50%); }
+
+        .joystick-stick {
+            position: absolute;
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            border-radius: 50%;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            box-shadow: 0 4px 15px rgba(99, 102, 241, 0.5);
+            cursor: grab;
+            transition: box-shadow 0.2s;
+        }
+
+        .joystick-stick:active {
+            cursor: grabbing;
+            box-shadow: 0 6px 25px rgba(99, 102, 241, 0.7);
+        }
+
+        .joystick-stick.dragging {
+            cursor: grabbing;
+        }
+
+        /* Side Controls */
+        .ar-side-controls {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            align-items: center;
+        }
+
+        /* Scale Control */
+        .ar-scale-control {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .scale-btn {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            border: 2px solid #4CAF50;
+            background: rgba(26, 26, 26, 0.9);
+            color: #81C784;
+            font-size: 20px;
+            font-weight: bold;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+            font-family: 'Cairo', sans-serif;
+        }
+
+        .scale-btn:active {
+            background: #4CAF50;
+            color: white;
             transform: scale(0.95);
         }
 
-        .ar-fixed-btn .btn-icon {
+        .scale-label {
+            font-size: 10px;
+            color: rgba(255, 255, 255, 0.7);
+        }
+
+        /* Rotation Dial */
+        .ar-rotation-dial {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+            cursor: pointer;
+        }
+
+        .dial-outer {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: rgba(26, 26, 26, 0.9);
+            border: 2px solid #9C27B0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+        }
+
+        .dial-inner {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #9C27B0, #E040FB);
+            display: flex;
+            align-items: center;
+            justify-content: center;
             font-size: 18px;
-            font-weight: bold;
+            transition: transform 0.3s;
         }
 
-        .ar-fixed-btn .btn-text {
-            font-size: 9px;
-            margin-top: 2px;
+        .ar-rotation-dial:active .dial-outer {
+            background: rgba(156, 39, 176, 0.3);
         }
 
-        .ar-fixed-btn.btn-rotate {
-            border-color: #9C27B0;
-            color: #CE93D8;
+        .dial-label {
+            font-size: 10px;
+            color: rgba(255, 255, 255, 0.7);
         }
 
-        .ar-fixed-btn.btn-rotate:active {
-            background: #9C27B0;
-            color: white;
+        /* Record Button */
+        .ar-record-btn {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+            background: transparent;
+            border: none;
+            cursor: pointer;
+            padding: 5px;
         }
 
-        .ar-fixed-btn.btn-record {
-            border-color: #F44336;
-            color: #EF5350;
+        .ar-record-btn .record-icon {
+            font-size: 28px;
         }
 
-        .ar-fixed-btn.btn-record:active {
-            background: #F44336;
-            color: white;
+        .ar-record-btn .record-text {
+            font-size: 10px;
+            color: rgba(255, 255, 255, 0.7);
         }
 
-        .ar-fixed-btn.btn-record.recording {
-            animation: recordingPulse 1s infinite;
-            background: rgba(244, 67, 54, 0.3);
+        .ar-record-btn.recording .record-icon {
+            animation: recordPulse 1s infinite;
         }
 
-        @keyframes recordingPulse {
-            0%, 100% { box-shadow: 0 0 0 0 rgba(244, 67, 54, 0.4); }
-            50% { box-shadow: 0 0 0 10px rgba(244, 67, 54, 0); }
+        @keyframes recordPulse {
+            0%, 100% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.2); opacity: 0.7; }
         }
 
-        .ar-fixed-btn.btn-reset {
-            border-color: #FF9800;
+        /* Reset Button */
+        .ar-reset-btn {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+            background: transparent;
+            border: none;
+            cursor: pointer;
+            padding: 5px;
+            font-size: 28px;
             color: #FFB74D;
         }
 
-        .ar-fixed-btn.btn-reset:active {
-            background: #FF9800;
-            color: white;
+        .ar-reset-btn .reset-text {
+            font-size: 10px;
+            color: rgba(255, 255, 255, 0.7);
+        }
+
+        /* Instructions */
+        .ar-instructions {
+            position: absolute;
+            top: -50px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 15px;
+            white-space: nowrap;
+        }
+
+        .instruction-item {
+            font-size: 11px;
+            color: rgba(255, 255, 255, 0.8);
+            background: rgba(0, 0, 0, 0.5);
+            padding: 6px 12px;
+            border-radius: 15px;
         }
 
         /* ========== Footer ========== */
@@ -1514,28 +1655,60 @@
                         environment-image="neutral"
                         exposure="1"
                     >
-                        <div class="ar-controls-panel">
-                            <!-- Row 1: Up -->
-                            <div class="ar-spacer"></div>
-                            <button class="ar-fixed-btn" onclick="moveModel('up')"><span class="btn-icon">▲</span><span class="btn-text">أعلى</span></button>
-                            <div class="ar-spacer"></div>
+                        <!-- AR Interactive Overlay -->
+                        <div class="ar-interactive-overlay" slot="ar-button">
+                            <!-- Virtual Joystick for Movement -->
+                            <div class="ar-joystick-container" id="joystickContainer">
+                                <div class="joystick-label">🎯 اسحب للتحريك</div>
+                                <div class="ar-joystick">
+                                    <div class="joystick-base">
+                                        <div class="joystick-direction up">▲</div>
+                                        <div class="joystick-direction left">◄</div>
+                                        <div class="joystick-direction right">►</div>
+                                        <div class="joystick-direction down">▼</div>
+                                        <div class="joystick-stick" id="joystickStick"></div>
+                                    </div>
+                                </div>
+                            </div>
                             
-                            <!-- Row 2: Left, Forward, Right -->
-                            <button class="ar-fixed-btn" onclick="moveModel('left')"><span class="btn-icon">◄</span><span class="btn-text">يسار</span></button>
-                            <button class="ar-fixed-btn" onclick="moveModel('fwd')"><span class="btn-icon">⭡</span><span class="btn-text">أمام</span></button>
-                            <button class="ar-fixed-btn" onclick="moveModel('right')"><span class="btn-icon">►</span><span class="btn-text">يمين</span></button>
+                            <!-- Side Controls -->
+                            <div class="ar-side-controls">
+                                <!-- Scale Controls -->
+                                <div class="ar-scale-control">
+                                    <button class="scale-btn" onclick="scaleModel(1.2)">+</button>
+                                    <span class="scale-label">تكبير</span>
+                                    <button class="scale-btn" onclick="scaleModel(0.8)">−</button>
+                                </div>
+                                
+                                <!-- Rotation Control -->
+                                <div class="ar-rotation-dial" id="rotationDial">
+                                    <div class="dial-outer">
+                                        <div class="dial-inner" id="dialInner">
+                                            <span class="dial-icon">↻</span>
+                                        </div>
+                                    </div>
+                                    <span class="dial-label">تدوير</span>
+                                </div>
+                                
+                                <!-- Record Button -->
+                                <button class="ar-record-btn" id="recordBtn" onclick="toggleRecording()">
+                                    <span class="record-icon">🔴</span>
+                                    <span class="record-text">تسجيل</span>
+                                </button>
+                                
+                                <!-- Reset Button -->
+                                <button class="ar-reset-btn" onclick="resetModel()">
+                                    <span>↺</span>
+                                    <span class="reset-text">إعادة</span>
+                                </button>
+                            </div>
                             
-                            <!-- Row 3: Rotate Left, Down, Rotate Right -->
-                            <button class="ar-fixed-btn btn-rotate" onclick="rotateModel('left')"><span class="btn-icon">↺</span><span class="btn-text">يسار</span></button>
-                            <button class="ar-fixed-btn" onclick="moveModel('down')"><span class="btn-icon">▼</span><span class="btn-text">أسفل</span></button>
-                            <button class="ar-fixed-btn btn-rotate" onclick="rotateModel('right')"><span class="btn-icon">↻</span><span class="btn-text">يمين</span></button>
-                            
-                            <!-- Row 4: Back, Record, Reset -->
-                            <button class="ar-fixed-btn" onclick="moveModel('bwd')"><span class="btn-icon">⭣</span><span class="btn-text">خلف</span></button>
-                            <button class="ar-fixed-btn btn-record" id="recordBtn" onclick="toggleRecording()"><span class="btn-icon">🔴</span><span class="btn-text">تسجيل</span></button>
-                            <button class="ar-fixed-btn btn-reset" onclick="resetModelPosition()"><span class="btn-icon">↺</span><span class="btn-text">إعادة</span></button>
+                            <!-- Instructions -->
+                            <div class="ar-instructions">
+                                <div class="instruction-item">👆 اسحب الدائرة للتحريك</div>
+                                <div class="instruction-item">🔄 دوّر القرص للتدوير</div>
+                            </div>
                         </div>
-                        <button slot="ar-button" style="display:none;"></button>
                     </model-viewer>
 
                     <div class="model-controls">
@@ -1815,15 +1988,176 @@
             shoe: 'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/MaterialsVariantsShoe/glTF-Binary/MaterialsVariantsShoe.glb'
         };
 
-        // AR Controls - Rotation tracking
+        // AR Controls State
         let currentRotation = 0;
+        let currentScale = 1;
+        let modelPosition = { x: 0, y: 0, z: 0 };
 
-        document.getElementById('resetView').addEventListener('click', () => {
+        // Scale Model
+        function scaleModel(factor) {
+            currentScale *= factor;
+            currentScale = Math.max(0.3, Math.min(3, currentScale));
+            modelViewer.scale = `${currentScale} ${currentScale} ${currentScale}`;
+            
+            // Visual feedback
+            const scaleBtns = document.querySelectorAll('.scale-btn');
+            scaleBtns.forEach(btn => {
+                btn.style.transform = 'scale(1.2)';
+                setTimeout(() => btn.style.transform = '', 150);
+            });
+        }
+
+        // Rotate Model with Dial
+        function initRotationDial() {
+            const dial = document.getElementById('rotationDial');
+            const dialInner = document.getElementById('dialInner');
+            let startAngle = 0;
+            let isDragging = false;
+
+            function getAngle(e, rect) {
+                const centerX = rect.left + rect.width / 2;
+                const centerY = rect.top + rect.height / 2;
+                const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+                const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+                return Math.atan2(clientY - centerY, clientX - centerX) * (180 / Math.PI);
+            }
+
+            dial.addEventListener('mousedown', startDrag);
+            dial.addEventListener('touchstart', startDrag, { passive: true });
+
+            function startDrag(e) {
+                isDragging = true;
+                const rect = dialInner.getBoundingClientRect();
+                startAngle = getAngle(e, rect) - currentRotation;
+                
+                document.addEventListener('mousemove', onDrag);
+                document.addEventListener('touchmove', onDrag, { passive: true });
+                document.addEventListener('mouseup', stopDrag);
+                document.addEventListener('touchend', stopDrag);
+            }
+
+            function onDrag(e) {
+                if (!isDragging) return;
+                const rect = dialInner.getBoundingClientRect();
+                const angle = getAngle(e, rect);
+                currentRotation = angle - startAngle;
+                dialInner.style.transform = `rotate(${currentRotation}deg)`;
+                modelViewer.orientation = `0deg 0deg ${currentRotation}deg`;
+            }
+
+            function stopDrag() {
+                isDragging = false;
+                document.removeEventListener('mousemove', onDrag);
+                document.removeEventListener('touchmove', onDrag);
+                document.removeEventListener('mouseup', stopDrag);
+                document.removeEventListener('touchend', stopDrag);
+            }
+        }
+
+        // Virtual Joystick for Movement
+        function initJoystick() {
+            const stick = document.getElementById('joystickStick');
+            const base = document.querySelector('.joystick-base');
+            let isDragging = false;
+            let baseRect = null;
+            let maxDistance = 25;
+
+            function handleStart(e) {
+                e.preventDefault();
+                isDragging = true;
+                baseRect = base.getBoundingClientRect();
+                stick.classList.add('dragging');
+            }
+
+            function handleMove(e) {
+                if (!isDragging || !baseRect) return;
+                
+                e.preventDefault();
+                
+                const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+                const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+                
+                const centerX = baseRect.left + baseRect.width / 2;
+                const centerY = baseRect.top + baseRect.height / 2;
+                
+                let deltaX = clientX - centerX;
+                let deltaY = clientY - centerY;
+                
+                // Calculate distance and clamp
+                const distance = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
+                if (distance > maxDistance) {
+                    deltaX = (deltaX / distance) * maxDistance;
+                    deltaY = (deltaY / distance) * maxDistance;
+                }
+                
+                // Move stick visually
+                stick.style.transform = `translate(calc(-50% + ${deltaX}px), calc(-50% + ${deltaY}px))`;
+                
+                // Calculate movement (normalize and apply)
+                const moveX = deltaX / maxDistance * 0.02;
+                const moveY = deltaY / maxDistance * 0.02;
+                
+                // Apply movement to model
+                modelPosition.x += moveX;
+                modelPosition.z += moveY;
+                
+                // Update model-viewer position
+                updateModelPosition();
+            }
+
+            function handleEnd() {
+                isDragging = false;
+                stick.classList.remove('dragging');
+                stick.style.transform = 'translate(-50%, -50%)';
+            }
+
+            // Mouse events
+            stick.addEventListener('mousedown', handleStart);
+            document.addEventListener('mousemove', handleMove);
+            document.addEventListener('mouseup', handleEnd);
+            
+            // Touch events
+            stick.addEventListener('touchstart', handleStart, { passive: false });
+            document.addEventListener('touchmove', handleMove, { passive: false });
+            document.addEventListener('touchend', handleEnd);
+        }
+
+        // Update Model Position
+        function updateModelPosition() {
+            // In AR mode, we use orientation and scale
+            // The model-viewer handles position via its internal AR systems
+            modelViewer.orientation = `0deg 0deg ${currentRotation}deg`;
+            modelViewer.scale = `${currentScale} ${currentScale} ${currentScale}`;
+        }
+
+        // Reset Model
+        function resetModel() {
+            currentRotation = 0;
+            currentScale = 1;
+            modelPosition = { x: 0, y: 0, z: 0 };
+            
+            modelViewer.orientation = '0deg 0deg 0deg';
+            modelViewer.scale = '1 1 1';
             modelViewer.cameraOrbit = 'auto auto auto';
             modelViewer.cameraTarget = 'auto auto auto';
-            currentRotation = 0;
-            modelViewer.orientation = '0deg 0deg 0deg';
+            
+            // Reset dial visually
+            const dialInner = document.getElementById('dialInner');
+            if (dialInner) {
+                dialInner.style.transform = 'rotate(0deg)';
+            }
+            
+            // Visual feedback
+            alert('تم إعادة ضبط المجسم ✅');
+        }
+
+        // Initialize controls when page loads
+        document.addEventListener('DOMContentLoaded', () => {
+            initJoystick();
+            initRotationDial();
         });
+
+        document.getElementById('resetView').addEventListener('click', resetModel);
 
         document.getElementById('viewInAR').addEventListener('click', () => {
             if (modelViewer.canActivateAR) {
@@ -1838,59 +2172,14 @@
                 document.querySelectorAll('.model-thumb').forEach(t => t.classList.remove('active'));
                 this.classList.add('active');
                 modelViewer.src = models[this.dataset.model];
-                // Reset rotation when changing model
+                // Reset when changing model
                 currentRotation = 0;
+                currentScale = 1;
+                modelPosition = { x: 0, y: 0, z: 0 };
                 modelViewer.orientation = '0deg 0deg 0deg';
+                modelViewer.scale = '1 1 1';
             });
         });
-
-        // Rotate model in AR mode
-        function rotateModel(direction) {
-            const mv = document.getElementById('ar-model');
-            if (direction === 'left') {
-                currentRotation -= 30;
-            } else {
-                currentRotation += 30;
-            }
-            mv.orientation = `0deg 0deg ${currentRotation}deg`;
-        }
-
-        // Move model in AR mode
-        function moveModel(direction) {
-            const mv = document.getElementById('ar-model');
-            const movementAmount = 0.15;
-            
-            switch (direction) {
-                case 'up':
-                    mv.positionY = (mv.positionY || 0) + movementAmount;
-                    break;
-                case 'down':
-                    mv.positionY = (mv.positionY || 0) - movementAmount;
-                    break;
-                case 'fwd':
-                    mv.positionZ = (mv.positionZ || 0) - movementAmount;
-                    break;
-                case 'bwd':
-                    mv.positionZ = (mv.positionZ || 0) + movementAmount;
-                    break;
-                case 'left':
-                    mv.positionX = (mv.positionX || 0) - movementAmount;
-                    break;
-                case 'right':
-                    mv.positionX = (mv.positionX || 0) + movementAmount;
-                    break;
-            }
-        }
-
-        // Reset model position and rotation
-        function resetModelPosition() {
-            const mv = document.getElementById('ar-model');
-            currentRotation = 0;
-            mv.orientation = '0deg 0deg 0deg';
-            mv.positionX = 0;
-            mv.positionY = 0;
-            mv.positionZ = 0;
-        }
 
         // Video Recording
         let mediaRecorder = null;
@@ -1944,8 +2233,8 @@
                 // Update button appearance
                 const recordBtn = document.getElementById('recordBtn');
                 recordBtn.classList.add('recording');
-                recordBtn.querySelector('.btn-icon').textContent = '⏹';
-                recordBtn.querySelector('.btn-text').textContent = 'إيقاف';
+                recordBtn.querySelector('.record-icon').textContent = '⏹';
+                recordBtn.querySelector('.record-text').textContent = 'إيقاف';
                 
             } catch (error) {
                 console.error('Recording error:', error);
@@ -1961,8 +2250,8 @@
                 // Update button appearance
                 const recordBtn = document.getElementById('recordBtn');
                 recordBtn.classList.remove('recording');
-                recordBtn.querySelector('.btn-icon').textContent = '🔴';
-                recordBtn.querySelector('.btn-text').textContent = 'تسجيل';
+                recordBtn.querySelector('.record-icon').textContent = '🔴';
+                recordBtn.querySelector('.record-text').textContent = 'تسجيل';
             }
         }
 
