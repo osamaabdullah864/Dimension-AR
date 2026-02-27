@@ -841,6 +841,66 @@
             color: var(--primary-light);
         }
 
+        /* ========== AR Controls Panel ========== */
+        .ar-controls-panel {
+            position: absolute;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
+            z-index: 9999;
+            pointer-events: auto;
+            width: 230px;
+        }
+
+        model-viewer:not([ar-status="session-started"]) .ar-controls-panel {
+            display: none;
+        }
+
+        .ar-fixed-btn {
+            background: rgba(26, 26, 26, 0.9);
+            color: white;
+            border: 1.5px solid var(--primary);
+            border-radius: 12px;
+            height: 52px;
+            font-size: 14px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            backdrop-filter: blur(5px);
+            -webkit-tap-highlight-color: transparent;
+            font-family: 'Cairo', sans-serif;
+            transition: all 0.3s;
+        }
+
+        .ar-fixed-btn:active {
+            background: var(--primary);
+        }
+
+        .ar-fixed-btn .btn-icon {
+            font-size: 18px;
+            font-weight: bold;
+        }
+
+        .ar-fixed-btn .btn-text {
+            font-size: 9px;
+            margin-top: 2px;
+        }
+
+        .ar-fixed-btn.btn-lock {
+            border-color: #4CAF50;
+            color: #4CAF50;
+        }
+
+        .ar-fixed-btn.btn-lock:active {
+            background: #4CAF50;
+            color: white;
+        }
+
         /* ========== Footer ========== */
         footer {
             padding: 2rem 1.5rem;
@@ -1292,6 +1352,24 @@
                 line-height: 24px;
                 font-size: 0.8rem;
             }
+
+            /* AR Controls Mobile */
+            .ar-controls-panel {
+                width: 200px;
+                gap: 8px;
+            }
+
+            .ar-fixed-btn {
+                height: 45px;
+            }
+
+            .ar-fixed-btn .btn-icon {
+                font-size: 16px;
+            }
+
+            .ar-fixed-btn .btn-text {
+                font-size: 8px;
+            }
         }
     </style>
 </head>
@@ -1320,6 +1398,10 @@
                 <span class="btn-icon">🚀</span>
                 جرب AR الآن
             </a>
+        </div>
+        <div class="scroll-hint">
+            <span>اسحب للأسفل</span>
+            <div class="scroll-mouse"></div>
         </div>
     </header>
 
@@ -1381,13 +1463,25 @@
                         alt="مجسم ثلاثي الأبعاد عالي الدقة"
                         ar
                         ar-modes="webxr scene-viewer quick-look"
+                        ar-placement="floor"
                         camera-controls
                         touch-action="pan-y"
                         auto-rotate
-                        shadow-intensity="1"
+                        shadow-intensity="2"
+                        ar-scale="fixed"
                         environment-image="neutral"
                         exposure="1"
-                    ></model-viewer>
+                    >
+                        <div class="ar-controls-panel">
+                            <button class="ar-fixed-btn" onclick="moveModel('up')"><span class="btn-icon">▲</span><span class="btn-text">أعلى</span></button>
+                            <button class="ar-fixed-btn" onclick="moveModel('fwd')"><span class="btn-icon">⭡</span><span class="btn-text">أمام</span></button>
+                            <button class="ar-fixed-btn" onclick="rotateModel()"><span class="btn-icon">↻</span><span class="btn-text">تدوير</span></button>
+                            <button class="ar-fixed-btn" onclick="moveModel('down')"><span class="btn-icon">▼</span><span class="btn-text">أسفل</span></button>
+                            <button class="ar-fixed-btn" onclick="moveModel('bwd')"><span class="btn-icon">⭣</span><span class="btn-text">خلف</span></button>
+                            <button class="ar-fixed-btn btn-lock" onclick="lockPosition()"><span class="btn-icon">✓</span><span class="btn-text">تثبيت</span></button>
+                        </div>
+                        <button slot="ar-button" style="display:none;"></button>
+                    </model-viewer>
 
                     <div class="model-controls">
                         <button class="model-btn primary" id="viewInAR">
@@ -1559,7 +1653,7 @@
             </div>
 
             <div style="text-align:center; margin-top:40px;">
-                <button onclick="togglePrivacy()" class="btn-new btn-primary" style="width:100%; max-width:200px; margin:0 auto; justify-content:center">
+                <button onclick="togglePrivacy()" class="btn-new btn-primary" style="width:100%; max-width:200px; margin:0 auto;">
                     <strong>فهمت ذلك</strong>
                 </button>
             </div>
@@ -1587,7 +1681,7 @@
                 <div class="form-group">
                     <textarea name="message" class="form-input" placeholder="نبذة عن خبرتك في الـ 3D" rows="3"></textarea>
                 </div>
-                <button type="submit" class="btn-new btn-primary" style="justify-content:center; width: 100%;">إرسال الطلب</button>
+                <button type="submit" class="btn-new btn-primary" style="width: 100%;">إرسال الطلب</button>
             </form>
         </div>
     </div>
@@ -1666,9 +1760,14 @@
             shoe: 'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/MaterialsVariantsShoe/glTF-Binary/MaterialsVariantsShoe.glb'
         };
 
+        // AR Controls - Rotation tracking
+        let currentRotation = 0;
+
         document.getElementById('resetView').addEventListener('click', () => {
             modelViewer.cameraOrbit = 'auto auto auto';
             modelViewer.cameraTarget = 'auto auto auto';
+            currentRotation = 0;
+            modelViewer.orientation = '0deg 0deg 0deg';
         });
 
         document.getElementById('viewInAR').addEventListener('click', () => {
@@ -1684,8 +1783,44 @@
                 document.querySelectorAll('.model-thumb').forEach(t => t.classList.remove('active'));
                 this.classList.add('active');
                 modelViewer.src = models[this.dataset.model];
+                // Reset rotation when changing model
+                currentRotation = 0;
+                modelViewer.orientation = '0deg 0deg 0deg';
             });
         });
+
+        // Rotate model in AR mode
+        function rotateModel() {
+            const mv = document.getElementById('ar-model');
+            currentRotation += 45;
+            mv.orientation = `0deg 0deg ${currentRotation}deg`;
+        }
+
+        // Move model in AR mode
+        function moveModel(direction) {
+            const mv = document.getElementById('ar-model');
+            const movementAmount = 0.1;
+            
+            switch (direction) {
+                case 'up':
+                    mv.positionY = (mv.positionY || 0) + movementAmount;
+                    break;
+                case 'down':
+                    mv.positionY = (mv.positionY || 0) - movementAmount;
+                    break;
+                case 'fwd':
+                    mv.positionZ = (mv.positionZ || 0) - movementAmount;
+                    break;
+                case 'bwd':
+                    mv.positionZ = (mv.positionZ || 0) + movementAmount;
+                    break;
+            }
+        }
+
+        // Lock/confirm model position
+        function lockPosition() {
+            alert('تم حفظ موقع المنتج بنجاح! ✅');
+        }
 
         // Touch-friendly interactions for mobile
         if ('ontouchstart' in window) {
