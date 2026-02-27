@@ -727,7 +727,7 @@
         .model-container {
             position: relative;
             border-radius: 24px;
-            overflow: hidden;
+            overflow: visible;
             background: linear-gradient(145deg, rgba(99, 102, 241, 0.05), rgba(236, 72, 153, 0.03));
             border: 1px solid rgba(99, 102, 241, 0.15);
         }
@@ -736,6 +736,7 @@
             width: 100%;
             height: 350px;
             --poster-color: transparent;
+            border-radius: 24px 24px 0 0;
         }
 
         .model-badge {
@@ -844,41 +845,38 @@
         /* ========== AR Interactive Overlay ========== */
         .ar-interactive-overlay {
             position: absolute;
-            bottom: 20px;
+            bottom: 85px;
             left: 50%;
             transform: translateX(-50%);
-            display: none;
+            display: flex;
             align-items: center;
             gap: 20px;
             z-index: 9999;
             pointer-events: auto;
-            padding: 15px;
+            padding: 15px 25px;
             background: rgba(0, 0, 0, 0.7);
             backdrop-filter: blur(10px);
             border-radius: 20px;
             border: 1px solid rgba(99, 102, 241, 0.3);
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
         }
 
-        model-viewer[ar-status="session-started"] .ar-interactive-overlay {
-            display: flex;
-        }
-
-        /* Scale Control */
-        .ar-scale-control {
+        /* Zoom Control */
+        .ar-zoom-control {
             display: flex;
             flex-direction: column;
             align-items: center;
             gap: 4px;
         }
 
-        .scale-btn {
+        .zoom-btn {
             width: 44px;
             height: 44px;
             border-radius: 50%;
-            border: 2px solid #4CAF50;
+            border: 2px solid var(--primary);
             background: rgba(26, 26, 26, 0.9);
-            color: #81C784;
-            font-size: 24px;
+            color: var(--primary-light);
+            font-size: 22px;
             font-weight: bold;
             cursor: pointer;
             display: flex;
@@ -886,66 +884,33 @@
             justify-content: center;
             transition: all 0.2s;
             font-family: 'Cairo', sans-serif;
-            -webkit-tap-highlight-color: transparent;
         }
 
-        .scale-btn:active {
-            background: #4CAF50;
+        .zoom-btn:hover {
+            background: var(--primary);
             color: white;
-            transform: scale(0.9);
+            transform: scale(1.1);
         }
 
-        .scale-label {
+        .zoom-btn:active {
+            transform: scale(0.95);
+        }
+
+        .zoom-label {
             font-size: 11px;
             color: rgba(255, 255, 255, 0.8);
+            text-align: center;
         }
 
-        /* Rotation Dial */
-        .ar-rotation-dial {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 4px;
-            -webkit-tap-highlight-color: transparent;
-            user-select: none;
-        }
-
-        .dial-outer {
-            width: 70px;
-            height: 70px;
-            border-radius: 50%;
-            background: rgba(26, 26, 26, 0.9);
-            border: 3px solid #9C27B0;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            position: relative;
-            cursor: grab;
-        }
-
-        .dial-outer:active {
-            cursor: grabbing;
-        }
-
-        .dial-inner {
-            width: 50px;
+        /* Divider */
+        .control-divider {
+            width: 1px;
             height: 50px;
-            border-radius: 50%;
-            background: linear-gradient(135deg, #9C27B0, #E040FB);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 22px;
-            pointer-events: none;
+            background: rgba(255, 255, 255, 0.2);
         }
 
-        .dial-label {
-            font-size: 11px;
-            color: rgba(255, 255, 255, 0.8);
-        }
-
-        /* Record Button */
-        .ar-record-btn {
+        /* Reset Button */
+        .ar-reset-btn {
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -954,32 +919,38 @@
             border: none;
             cursor: pointer;
             padding: 5px;
-            -webkit-tap-highlight-color: transparent;
+            font-size: 28px;
+            color: #FFB74D;
+            transition: transform 0.2s;
         }
 
-        .ar-record-btn .record-icon {
-            font-size: 32px;
+        .ar-reset-btn:hover {
+            transform: scale(1.1);
         }
 
-        .ar-record-btn .record-text {
+        .ar-reset-btn .reset-text {
             font-size: 11px;
             color: rgba(255, 255, 255, 0.8);
         }
 
-        .ar-record-btn.recording .record-icon {
-            animation: recordPulse 1s infinite;
+        /* Controls Hint */
+        .controls-hint {
+            position: absolute;
+            top: -45px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 15px;
+            white-space: nowrap;
         }
 
-        @keyframes recordPulse {
-            0%, 100% { transform: scale(1); opacity: 1; }
-            50% { transform: scale(1.2); opacity: 0.7; }
-        }
-
-        /* ========== FIX: AR Overlay Button Controls ========== */
-        .ar-scale-control, .ar-rotation-dial, .ar-record-btn,
-        .scale-btn, .dial-outer, .dial-inner {
-            pointer-events: auto !important;
-            touch-action: manipulation;
+        .hint-item {
+            font-size: 12px;
+            color: rgba(255, 255, 255, 0.9);
+            background: rgba(0, 0, 0, 0.6);
+            padding: 8px 15px;
+            border-radius: 20px;
+            border: 1px solid rgba(99, 102, 241, 0.3);
         }
 
         /* ========== Footer ========== */
@@ -1436,25 +1407,40 @@
 
             /* AR Controls Mobile */
             .ar-interactive-overlay {
+                padding: 12px 18px;
                 gap: 12px;
-                padding: 12px;
+                bottom: 75px;
             }
 
-            .scale-btn {
+            .controls-hint {
+                top: -40px;
+            }
+
+            .hint-item {
+                font-size: 10px;
+                padding: 6px 10px;
+            }
+
+            .zoom-btn {
                 width: 38px;
                 height: 38px;
-                font-size: 20px;
-            }
-
-            .dial-outer {
-                width: 60px;
-                height: 60px;
-            }
-
-            .dial-inner {
-                width: 42px;
-                height: 42px;
                 font-size: 18px;
+            }
+
+            .zoom-label {
+                font-size: 10px;
+            }
+
+            .control-divider {
+                height: 40px;
+            }
+
+            .ar-reset-btn {
+                font-size: 24px;
+            }
+
+            .ar-reset-btn .reset-text {
+                font-size: 10px;
             }
         }
     </style>
@@ -1557,37 +1543,45 @@
                         ar-scale="fixed"
                         environment-image="neutral"
                         exposure="1"
-                    >
-                        <!-- AR Interactive Overlay -->
-                        <div class="ar-interactive-overlay">
-                            <!-- Scale Controls -->
-                            <div class="ar-scale-control">
-                                <button class="scale-btn" id="scaleUp">+</button>
-                                <span class="scale-label">تكبير</span>
-                                <button class="scale-btn" id="scaleDown">−</button>
-                            </div>
-                            
-                            <!-- Rotation Dial -->
-                            <div class="ar-rotation-dial" id="rotationDial">
-                                <div class="dial-outer" id="dialOuter">
-                                    <div class="dial-inner" id="dialInner">
-                                        <span class="dial-icon">↻</span>
-                                    </div>
-                                </div>
-                                <span class="dial-label">تدوير</span>
-                            </div>
-                            
-                            <!-- Record Button -->
-                            <button class="ar-record-btn" id="recordBtn">
-                                <span class="record-icon">🔴</span>
-                                <span class="record-text">تسجيل</span>
-                            </button>
+                    ></model-viewer>
+
+                    <!-- AR Interactive Controls -->
+                    <div class="ar-interactive-overlay">
+                        <!-- Controls Hint -->
+                        <div class="controls-hint">
+                            <span class="hint-item">👆 اسحب للتدوير</span>
+                            <span class="hint-item">🔍 اضغط للتقريب</span>
                         </div>
-                    </model-viewer>
+                        
+                        <!-- Zoom In -->
+                        <div class="ar-zoom-control">
+                            <button class="zoom-btn" onclick="zoomCamera(0.7)">+</button>
+                            <span class="zoom-label">تقريب</span>
+                        </div>
+                        
+                        <div class="control-divider"></div>
+                        
+                        <!-- Zoom Out -->
+                        <div class="ar-zoom-control">
+                            <button class="zoom-btn" onclick="zoomCamera(1.4)">−</button>
+                            <span class="zoom-label">تبعيد</span>
+                        </div>
+                        
+                        <div class="control-divider"></div>
+                        
+                        <!-- Reset Button -->
+                        <button class="ar-reset-btn" onclick="resetCamera()">
+                            <span>↺</span>
+                            <span class="reset-text">إعادة</span>
+                        </button>
+                    </div>
 
                     <div class="model-controls">
                         <button class="model-btn primary" id="viewInAR">
                             📷 شاهد في غرفتك
+                        </button>
+                        <button class="model-btn ghost" id="resetView">
+                            🔄 إعادة ضبط
                         </button>
                     </div>
                     
@@ -1834,6 +1828,7 @@
                 document.querySelectorAll('.modal-overlay.active').forEach(modal => {
                     modal.classList.remove('active');
                 });
+                // Close privacy modal
                 const privacyModal = document.getElementById('privacyModal');
                 if (privacyModal.style.display === 'flex') {
                     privacyModal.style.display = 'none';
@@ -1858,123 +1853,46 @@
             shoe: 'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/MaterialsVariantsShoe/glTF-Binary/MaterialsVariantsShoe.glb'
         };
 
-        // AR Controls State
-        let currentRotation = 0;
-        let currentScale = 1;
-        let arSession = null;
+        // Camera zoom distance
+        let currentZoom = 1;
 
-        // Scale Model Function
-        function scaleModel(factor) {
-            currentScale *= factor;
-            currentScale = Math.max(0.3, Math.min(3, currentScale));
+        // Zoom Camera (Approach/Retreat from model)
+        function zoomCamera(factor) {
+            const orbit = modelViewer.getCameraOrbit();
             
-            // Update model scale
-            modelViewer.scale = currentScale + ' ' + currentScale + ' ' + currentScale;
+            // Calculate new radius (distance from model)
+            let newRadius = orbit.radius * factor;
+            
+            // Clamp zoom limits
+            newRadius = Math.max(0.5, Math.min(5, newRadius));
+            
+            // Apply new orbit with same angles but different distance
+            modelViewer.cameraOrbit = `${orbit.theta}rad ${orbit.phi}rad ${newRadius}m`;
             
             // Visual feedback
-            const scaleBtns = document.querySelectorAll('.scale-btn');
-            scaleBtns.forEach(btn => {
+            const zoomBtns = document.querySelectorAll('.zoom-btn');
+            zoomBtns.forEach(btn => {
                 btn.style.transform = 'scale(1.2)';
-                setTimeout(() => btn.style.transform = '', 150);
+                setTimeout(() => btn.style.transform = '', 200);
             });
         }
 
-        // Scale Button Events
-        document.getElementById('scaleUp').addEventListener('click', (e) => {
-            e.preventDefault();
-            e.stopPropagation();
-            scaleModel(1.2);
-        });
-        
-        document.getElementById('scaleDown').addEventListener('click', (e) => {
-            e.preventDefault();
-            e.stopPropagation();
-            scaleModel(0.8);
-        });
-
-        // Rotation Dial - FIXED Implementation
-        function initRotationDial() {
-            const dialOuter = document.getElementById('dialOuter');
-            const dialInner = document.getElementById('dialInner');
-            let isDragging = false;
-            let startAngle = 0;
-            let startRotation = 0;
-
-            function getAngle(e) {
-                const rect = dialOuter.getBoundingClientRect();
-                const centerX = rect.left + rect.width / 2;
-                const centerY = rect.top + rect.height / 2;
-                
-                const clientX = e.touches ? e.touches[0].clientX : e.clientX;
-                const clientY = e.touches ? e.touches[0].clientY : e.clientY;
-                
-                return Math.atan2(clientY - centerY, clientX - centerX) * (180 / Math.PI);
-            }
-
-            function onStart(e) {
-                e.preventDefault();
-                e.stopPropagation();
-                isDragging = true;
-                startAngle = getAngle(e);
-                startRotation = currentRotation;
-                dialOuter.style.cursor = 'grabbing';
-            }
-
-            function onMove(e) {
-                if (!isDragging) return;
-                e.preventDefault();
-                e.stopPropagation();
-                
-                const angle = getAngle(e);
-                const deltaAngle = angle - startAngle;
-                
-                currentRotation = startRotation + deltaAngle;
-                
-                // Update visual rotation
-                dialInner.style.transform = 'rotate(' + currentRotation + 'deg)';
-                
-                // Apply rotation to model using orientation
-                modelViewer.orientation = '0deg 0deg ' + currentRotation + 'deg';
-            }
-
-            function onEnd() {
-                if (isDragging) {
-                    isDragging = false;
-                    dialOuter.style.cursor = 'grab';
-                }
-            }
-
-            // Mouse events
-            dialOuter.addEventListener('mousedown', onStart);
-            document.addEventListener('mousemove', onMove);
-            document.addEventListener('mouseup', onEnd);
+        // Reset Camera to default position
+        function resetCamera() {
+            modelViewer.cameraOrbit = 'auto auto auto';
+            modelViewer.cameraTarget = 'auto auto auto';
+            modelViewer.fieldOfView = 'auto';
             
-            // Touch events
-            dialOuter.addEventListener('touchstart', onStart, { passive: false });
-            document.addEventListener('touchmove', onMove, { passive: false });
-            document.addEventListener('touchend', onEnd);
+            // Visual feedback
+            const resetBtn = document.querySelector('.ar-reset-btn');
+            if (resetBtn) {
+                resetBtn.style.transform = 'scale(1.2)';
+                setTimeout(() => resetBtn.style.transform = '', 200);
+            }
         }
 
-        // Initialize when DOM is ready
-        document.addEventListener('DOMContentLoaded', () => {
-            initRotationDial();
-        });
+        document.getElementById('resetView').addEventListener('click', resetCamera);
 
-        // Also initialize after model loads
-        modelViewer.addEventListener('load', () => {
-            initRotationDial();
-        });
-
-        // AR Session tracking
-        modelViewer.addEventListener('ar-status', (e) => {
-            if (e.detail.status === 'session-started') {
-                arSession = true;
-            } else if (e.detail.status === 'not-presenting') {
-                arSession = false;
-            }
-        });
-
-        // View in AR Button
         document.getElementById('viewInAR').addEventListener('click', () => {
             if (modelViewer.canActivateAR) {
                 modelViewer.activateAR();
@@ -1983,122 +1901,15 @@
             }
         });
 
-        // Model Selector
         document.querySelectorAll('.model-thumb').forEach(thumb => {
             thumb.addEventListener('click', function() {
                 document.querySelectorAll('.model-thumb').forEach(t => t.classList.remove('active'));
                 this.classList.add('active');
                 modelViewer.src = models[this.dataset.model];
-                currentRotation = 0;
-                currentScale = 1;
-                modelViewer.orientation = '0deg 0deg 0deg';
-                modelViewer.scale = '1 1 1';
-                
-                // Reset dial visual
-                const dialInner = document.getElementById('dialInner');
-                if (dialInner) {
-                    dialInner.style.transform = 'rotate(0deg)';
-                }
+                // Reset camera when changing model
+                resetCamera();
             });
         });
-
-        // Video Recording - MP4 Format
-        let mediaRecorder = null;
-        let recordedChunks = [];
-        let isRecording = false;
-
-        function toggleRecording(e) {
-            e.preventDefault();
-            e.stopPropagation();
-            
-            if (isRecording) {
-                stopRecording();
-            } else {
-                startRecording();
-            }
-        }
-
-        document.getElementById('recordBtn').addEventListener('click', toggleRecording);
-
-        async function startRecording() {
-            try {
-                const mv = document.querySelector('model-viewer');
-                const canvas = mv.shadowRoot ? mv.shadowRoot.querySelector('canvas') : null;
-                
-                if (!canvas) {
-                    alert('لا يمكن الوصول إلى الكاميرا. تأكد من تفعيل AR أولاً.');
-                    return;
-                }
-
-                const stream = canvas.captureStream(30);
-                
-                // Try MP4 first, fallback to webm
-                let mimeType = 'video/mp4';
-                if (!MediaRecorder.isTypeSupported(mimeType)) {
-                    mimeType = 'video/webm;codecs=vp9';
-                    if (!MediaRecorder.isTypeSupported(mimeType)) {
-                        mimeType = 'video/webm';
-                    }
-                }
-                
-                mediaRecorder = new MediaRecorder(stream, { 
-                    mimeType: mimeType,
-                    videoBitsPerSecond: 5000000
-                });
-                
-                recordedChunks = [];
-                
-                mediaRecorder.ondataavailable = (event) => {
-                    if (event.data.size > 0) {
-                        recordedChunks.push(event.data);
-                    }
-                };
-                
-                mediaRecorder.onstop = () => {
-                    const blobType = mimeType.includes('mp4') ? 'video/mp4' : 'video/webm';
-                    const blob = new Blob(recordedChunks, { type: blobType });
-                    const url = URL.createObjectURL(blob);
-                    
-                    // Determine file extension
-                    const extension = mimeType.includes('mp4') ? 'mp4' : 'webm';
-                    
-                    // Create download link
-                    const a = document.createElement('a');
-                    a.href = url;
-                    a.download = 'AR_Recording_' + Date.now() + '.' + extension;
-                    document.body.appendChild(a);
-                    a.click();
-                    document.body.removeChild(a);
-                    URL.revokeObjectURL(url);
-                };
-                
-                mediaRecorder.start();
-                isRecording = true;
-                
-                // Update button appearance
-                const recordBtn = document.getElementById('recordBtn');
-                recordBtn.classList.add('recording');
-                recordBtn.querySelector('.record-icon').textContent = '⏹';
-                recordBtn.querySelector('.record-text').textContent = 'إيقاف';
-                
-            } catch (error) {
-                console.error('Recording error:', error);
-                alert('حدث خطأ أثناء بدء التسجيل. تأكد من استخدام متصفح يدعم هذه الميزة.');
-            }
-        }
-
-        function stopRecording() {
-            if (mediaRecorder && mediaRecorder.state !== 'inactive') {
-                mediaRecorder.stop();
-                isRecording = false;
-                
-                // Update button appearance
-                const recordBtn = document.getElementById('recordBtn');
-                recordBtn.classList.remove('recording');
-                recordBtn.querySelector('.record-icon').textContent = '🔴';
-                recordBtn.querySelector('.record-text').textContent = 'تسجيل';
-            }
-        }
 
         // Touch-friendly interactions for mobile
         if ('ontouchstart' in window) {
