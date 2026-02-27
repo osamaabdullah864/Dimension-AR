@@ -849,14 +849,20 @@
             transform: translateX(-50%);
             display: grid;
             grid-template-columns: repeat(3, 1fr);
-            gap: 12px;
+            grid-template-rows: repeat(4, auto);
+            gap: 10px;
             z-index: 9999;
             pointer-events: auto;
-            width: 230px;
+            width: 240px;
         }
 
         model-viewer:not([ar-status="session-started"]) .ar-controls-panel {
             display: none;
+        }
+
+        .ar-spacer {
+            visibility: hidden;
+            height: 50px;
         }
 
         .ar-fixed-btn {
@@ -864,7 +870,7 @@
             color: white;
             border: 1.5px solid var(--primary);
             border-radius: 12px;
-            height: 52px;
+            height: 50px;
             font-size: 14px;
             display: flex;
             flex-direction: column;
@@ -875,10 +881,12 @@
             -webkit-tap-highlight-color: transparent;
             font-family: 'Cairo', sans-serif;
             transition: all 0.3s;
+            user-select: none;
         }
 
         .ar-fixed-btn:active {
             background: var(--primary);
+            transform: scale(0.95);
         }
 
         .ar-fixed-btn .btn-icon {
@@ -891,13 +899,43 @@
             margin-top: 2px;
         }
 
-        .ar-fixed-btn.btn-lock {
-            border-color: #4CAF50;
-            color: #4CAF50;
+        .ar-fixed-btn.btn-rotate {
+            border-color: #9C27B0;
+            color: #CE93D8;
         }
 
-        .ar-fixed-btn.btn-lock:active {
-            background: #4CAF50;
+        .ar-fixed-btn.btn-rotate:active {
+            background: #9C27B0;
+            color: white;
+        }
+
+        .ar-fixed-btn.btn-record {
+            border-color: #F44336;
+            color: #EF5350;
+        }
+
+        .ar-fixed-btn.btn-record:active {
+            background: #F44336;
+            color: white;
+        }
+
+        .ar-fixed-btn.btn-record.recording {
+            animation: recordingPulse 1s infinite;
+            background: rgba(244, 67, 54, 0.3);
+        }
+
+        @keyframes recordingPulse {
+            0%, 100% { box-shadow: 0 0 0 0 rgba(244, 67, 54, 0.4); }
+            50% { box-shadow: 0 0 0 10px rgba(244, 67, 54, 0); }
+        }
+
+        .ar-fixed-btn.btn-reset {
+            border-color: #FF9800;
+            color: #FFB74D;
+        }
+
+        .ar-fixed-btn.btn-reset:active {
+            background: #FF9800;
             color: white;
         }
 
@@ -1355,8 +1393,12 @@
 
             /* AR Controls Mobile */
             .ar-controls-panel {
-                width: 200px;
+                width: 210px;
                 gap: 8px;
+            }
+
+            .ar-spacer {
+                height: 45px;
             }
 
             .ar-fixed-btn {
@@ -1473,12 +1515,25 @@
                         exposure="1"
                     >
                         <div class="ar-controls-panel">
+                            <!-- Row 1: Up -->
+                            <div class="ar-spacer"></div>
                             <button class="ar-fixed-btn" onclick="moveModel('up')"><span class="btn-icon">▲</span><span class="btn-text">أعلى</span></button>
+                            <div class="ar-spacer"></div>
+                            
+                            <!-- Row 2: Left, Forward, Right -->
+                            <button class="ar-fixed-btn" onclick="moveModel('left')"><span class="btn-icon">◄</span><span class="btn-text">يسار</span></button>
                             <button class="ar-fixed-btn" onclick="moveModel('fwd')"><span class="btn-icon">⭡</span><span class="btn-text">أمام</span></button>
-                            <button class="ar-fixed-btn" onclick="rotateModel()"><span class="btn-icon">↻</span><span class="btn-text">تدوير</span></button>
+                            <button class="ar-fixed-btn" onclick="moveModel('right')"><span class="btn-icon">►</span><span class="btn-text">يمين</span></button>
+                            
+                            <!-- Row 3: Rotate Left, Down, Rotate Right -->
+                            <button class="ar-fixed-btn btn-rotate" onclick="rotateModel('left')"><span class="btn-icon">↺</span><span class="btn-text">يسار</span></button>
                             <button class="ar-fixed-btn" onclick="moveModel('down')"><span class="btn-icon">▼</span><span class="btn-text">أسفل</span></button>
+                            <button class="ar-fixed-btn btn-rotate" onclick="rotateModel('right')"><span class="btn-icon">↻</span><span class="btn-text">يمين</span></button>
+                            
+                            <!-- Row 4: Back, Record, Reset -->
                             <button class="ar-fixed-btn" onclick="moveModel('bwd')"><span class="btn-icon">⭣</span><span class="btn-text">خلف</span></button>
-                            <button class="ar-fixed-btn btn-lock" onclick="lockPosition()"><span class="btn-icon">✓</span><span class="btn-text">تثبيت</span></button>
+                            <button class="ar-fixed-btn btn-record" id="recordBtn" onclick="toggleRecording()"><span class="btn-icon">🔴</span><span class="btn-text">تسجيل</span></button>
+                            <button class="ar-fixed-btn btn-reset" onclick="resetModelPosition()"><span class="btn-icon">↺</span><span class="btn-text">إعادة</span></button>
                         </div>
                         <button slot="ar-button" style="display:none;"></button>
                     </model-viewer>
@@ -1790,16 +1845,20 @@
         });
 
         // Rotate model in AR mode
-        function rotateModel() {
+        function rotateModel(direction) {
             const mv = document.getElementById('ar-model');
-            currentRotation += 45;
+            if (direction === 'left') {
+                currentRotation -= 30;
+            } else {
+                currentRotation += 30;
+            }
             mv.orientation = `0deg 0deg ${currentRotation}deg`;
         }
 
         // Move model in AR mode
         function moveModel(direction) {
             const mv = document.getElementById('ar-model');
-            const movementAmount = 0.1;
+            const movementAmount = 0.15;
             
             switch (direction) {
                 case 'up':
@@ -1814,12 +1873,97 @@
                 case 'bwd':
                     mv.positionZ = (mv.positionZ || 0) + movementAmount;
                     break;
+                case 'left':
+                    mv.positionX = (mv.positionX || 0) - movementAmount;
+                    break;
+                case 'right':
+                    mv.positionX = (mv.positionX || 0) + movementAmount;
+                    break;
             }
         }
 
-        // Lock/confirm model position
-        function lockPosition() {
-            alert('تم حفظ موقع المنتج بنجاح! ✅');
+        // Reset model position and rotation
+        function resetModelPosition() {
+            const mv = document.getElementById('ar-model');
+            currentRotation = 0;
+            mv.orientation = '0deg 0deg 0deg';
+            mv.positionX = 0;
+            mv.positionY = 0;
+            mv.positionZ = 0;
+        }
+
+        // Video Recording
+        let mediaRecorder = null;
+        let recordedChunks = [];
+        let isRecording = false;
+
+        function toggleRecording() {
+            if (isRecording) {
+                stopRecording();
+            } else {
+                startRecording();
+            }
+        }
+
+        async function startRecording() {
+            try {
+                const canvas = document.querySelector('model-viewer').shadowRoot.querySelector('canvas');
+                if (!canvas) {
+                    alert('لا يمكن الوصول إلى الكاميرا. تأكد من تفعيل AR أولاً.');
+                    return;
+                }
+
+                const stream = canvas.captureStream(30);
+                mediaRecorder = new MediaRecorder(stream, { mimeType: 'video/webm' });
+                
+                recordedChunks = [];
+                
+                mediaRecorder.ondataavailable = (event) => {
+                    if (event.data.size > 0) {
+                        recordedChunks.push(event.data);
+                    }
+                };
+                
+                mediaRecorder.onstop = () => {
+                    const blob = new Blob(recordedChunks, { type: 'video/webm' });
+                    const url = URL.createObjectURL(blob);
+                    
+                    // Create download link
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = `AR_Recording_${Date.now()}.webm`;
+                    document.body.appendChild(a);
+                    a.click();
+                    document.body.removeChild(a);
+                    URL.revokeObjectURL(url);
+                };
+                
+                mediaRecorder.start();
+                isRecording = true;
+                
+                // Update button appearance
+                const recordBtn = document.getElementById('recordBtn');
+                recordBtn.classList.add('recording');
+                recordBtn.querySelector('.btn-icon').textContent = '⏹';
+                recordBtn.querySelector('.btn-text').textContent = 'إيقاف';
+                
+            } catch (error) {
+                console.error('Recording error:', error);
+                alert('حدث خطأ أثناء بدء التسجيل. تأكد من استخدام متصفح يدعم هذه الميزة.');
+            }
+        }
+
+        function stopRecording() {
+            if (mediaRecorder && mediaRecorder.state !== 'inactive') {
+                mediaRecorder.stop();
+                isRecording = false;
+                
+                // Update button appearance
+                const recordBtn = document.getElementById('recordBtn');
+                recordBtn.classList.remove('recording');
+                recordBtn.querySelector('.btn-icon').textContent = '🔴';
+                recordBtn.querySelector('.btn-text').textContent = 'تسجيل';
+            }
         }
 
         // Touch-friendly interactions for mobile
